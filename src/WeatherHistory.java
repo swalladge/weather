@@ -15,6 +15,10 @@ public class WeatherHistory {
         history.add(w);
     }
 
+    public void insertObservation(int index, WeatherObservation w) {
+        history.add(index, w);
+    }
+
     public Integer getHistorySize() {
         return history.size();
     }
@@ -41,7 +45,7 @@ public class WeatherHistory {
 
     @Override
     public String toString() {
-        String output = "WeatherHistory\n  |\n";
+        String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
 
         int max = 0;
 
@@ -56,7 +60,7 @@ public class WeatherHistory {
         for (WeatherObservation o: history) {
             String place = o.getPlace();
             int padding = max - place.length();
-            output = output + "  |- " + this.gen_padding(padding) + o + "\n";
+            output = output + "|- " + this.gen_padding(padding) + o + "\n";
         }
         output += "--------------";
 
