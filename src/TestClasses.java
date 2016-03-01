@@ -20,6 +20,8 @@ public class TestClasses {
 
         System.out.println(history);
 
+        // TODO: more testing (especially of setters)
+
     }
 
 }
