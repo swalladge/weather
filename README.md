@@ -2,7 +2,7 @@
 
 # Weather
 
-A project for HIT237.
+A project for HIT237 by Samuel Walladge (student number: s265679).
 
 ## Info
 
@@ -12,4 +12,4 @@ A project for HIT237.
 
 ## copyright
 
-Copyright © 2016 Samuel Walladge
+Copyright © 2016 Samuel Walladge 
