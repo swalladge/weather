@@ -66,3 +66,4 @@ hs_err_pid*
 
 # extra gradle stuff
 .gradle/
+gradle/
