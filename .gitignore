@@ -67,3 +67,7 @@ hs_err_pid*
 # extra gradle stuff
 .gradle/
 gradle/
+
+# random serialized data files
+*.ser
+

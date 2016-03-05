@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class WeatherObservation {
+public class WeatherObservation implements Serializable {
     private String place = "";
     private Date date = new Date();
     private Double temperature = 0.0;
