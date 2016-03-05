@@ -74,13 +74,18 @@ public class WeatherHistory implements Serializable {
     public Boolean loadFromSerialized(String file) {
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
-            ArrayList temp = (ArrayList) is.readObject();
+            ArrayList temp = null;
+            try {
+                temp = (ArrayList) is.readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
             is.close();
+
+            // only save to history if for sure no previous errors occurred
             this.history = temp;
         } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return false;
         }
