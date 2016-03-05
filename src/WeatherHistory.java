@@ -44,6 +44,10 @@ public class WeatherHistory implements Serializable {
         return s.toString();
     }
 
+    public void clear() {
+        this.history.clear();
+    }
+
     /**
      * serializes the history ArrayList to file
      * @param file - file to save to
