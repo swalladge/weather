@@ -1,11 +1,15 @@
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TestClasses {
+    private static Logger logger = Logger.getLogger(TestClasses.class.getName());
 
 
     public static void main(String[] args) throws ParseException {
+        logger.getParent().setLevel(Level.ALL);
 
         // init a few weather observations (made up)
         WeatherObservation w1 = new WeatherObservation("Sydney", "2016-02-01", 32.0, 45.0, 11.0, 10.5);
@@ -48,29 +52,30 @@ public class TestClasses {
         System.out.printf("Random correlation: relative humidity was %s%% on a %s degree day in %s!%n", obs2.getHumidity(), obs2.getTemperature(), obs2.getPlace());
 
         // save the weather history as it is currently
-        System.out.println("INFO: saving history");
+        System.out.println("saving history");
         String saveFile = "serializeddata.ser";
         history.saveToSerialized(saveFile);
         System.out.println(history);
 
         // remove some observations
-        System.out.println("INFO: removing some history");
+        System.out.println("removing some history");
         history.removeObservation(0);
         history.removeObservation(0);
         history.removeObservation(0);
         System.out.println(history);
 
         // load the previously saved data
-        System.out.println("INFO: loading saved history");
+        System.out.println("loaded saved history");
         history.loadFromSerialized(saveFile);
         System.out.println(history);
 
 
+        // testing loading from non-existant file, and also testing the logger
         Boolean ok = history.loadFromSerialized("randomaoenuhaonuh");
         if (ok) {
-            System.out.println("INFO: loaded data from 'randomaoenuhaonuh'");
+            System.out.println("successfully loaded data from 'randomaoenuhaonuh");
         } else {
-            System.out.println("INFO: couldn't load data from 'randomaoenuhaonuh' - file not found or invalid data");
+            System.out.println("couldn't load data from 'randomaoenuhaonuh - file not found or invalid data");
         }
 
     }

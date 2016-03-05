@@ -1,8 +1,11 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WeatherHistory implements Serializable {
     ArrayList<WeatherObservation> history = new ArrayList<>();
+    private static Logger logger = Logger.getLogger(WeatherHistory.class.getName());
 
     public WeatherHistory() {
 
@@ -60,7 +63,7 @@ public class WeatherHistory implements Serializable {
             os.writeObject(this.history);
             os.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
             return false;
         }
         return true;
@@ -78,7 +81,7 @@ public class WeatherHistory implements Serializable {
             try {
                 temp = (ArrayList) is.readObject();
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "ClassNotFoundException [{0}]", e.getMessage());
                 return false;
             }
             is.close();
@@ -86,7 +89,7 @@ public class WeatherHistory implements Serializable {
             // only save to history if for sure no previous errors occurred
             this.history = temp;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
             return false;
         }
         return true;

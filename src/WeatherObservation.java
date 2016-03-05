@@ -3,6 +3,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class WeatherObservation implements Serializable {
     private String place = "";
@@ -11,6 +12,7 @@ public class WeatherObservation implements Serializable {
     private Double humidity = 0.0;
     private Double uvIndex = 0.0;
     private Double windSpeed = 0.0;
+    private static Logger logger = Logger.getLogger(WeatherObservation.class.getName());
 
     public WeatherObservation() {
 
