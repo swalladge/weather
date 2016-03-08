@@ -1,7 +1,12 @@
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WeatherHistory implements Serializable {
     ArrayList<WeatherObservation> history = new ArrayList<>();
@@ -105,15 +110,43 @@ public class WeatherHistory implements Serializable {
             fileReader = new FileReader(theFile);
             reader = new BufferedReader(fileReader);
 
+            // first line just the header
+            line = reader.readLine();
+
+            Pattern format = Pattern.compile("^(.+)\\s+(\\d+/\\d+/\\d+)\\s+(.*)$");
+            ArrayList<WeatherObservation> tempArray = new ArrayList<>();
+
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                Matcher m = format.matcher(line);
+                if (m.matches()) {
+                    String place = m.group(1);
+                    Date dateDate = new SimpleDateFormat("dd/mm/yyyy").parse(m.group(2));
+                    String date = new SimpleDateFormat("yyyy-mm-dd").format(dateDate);
+
+                    String[] other = m.group(3).split(" ");
+                    Double temperature = Double.parseDouble(other[0]);
+                    Double humidity = Double.parseDouble(other[1]);
+                    Double uvIndex = Double.parseDouble(other[2]);
+                    Double windSpeed = Double.parseDouble(other[3]);
+
+                    WeatherObservation w = new WeatherObservation(place, date, temperature, humidity, uvIndex, windSpeed);
+                    tempArray.add(w);
+                } else {
+                    throw new ParseException("Invalid format in file.", -1);
+                }
             }
+
+            // actually update the history array now no exception found
+            this.history = tempArray;
             return true;
 
         } catch (FileNotFoundException e) {
             logger.log(Level.SEVERE, "File Not Found [{0}]", e.getMessage());
         } catch (IOException e) {
             logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+        } catch (ParseException e) {
+            // when date or other data wrong format
+            logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
         } finally {
             try {
                 if (fileReader != null) {

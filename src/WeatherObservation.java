@@ -40,8 +40,17 @@ public class WeatherObservation implements Serializable {
         return format.format(this.date);
     }
 
+    public String getNormalDate() {
+        SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyyy");
+        return format.format(this.date);
+    }
+
     public void setDate(String date) throws ParseException {
         this.date = new SimpleDateFormat("yyyy-mm-dd").parse(date);
+    }
+
+    public void setNormalDate(String date) throws ParseException {
+        this.date = new SimpleDateFormat("dd/mm/yyyy").parse(date);
     }
 
     public String getPlace() {
