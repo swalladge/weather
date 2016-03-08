@@ -15,13 +15,21 @@ public class TestFileIO {
         history.loadFromFile("observations.txt");
         System.out.println(history);
 
+        // add more observations - should not overwrite previous data
+        history.addFromFile("other-observations.txt");
+        System.out.println(history);
 
-        // add an observation
+        // now direct load other observations - should now only contain stuff from this file
+        history.loadFromFile("other-observations.txt");
+        System.out.println(history);
+
+        // add another observation
         WeatherObservation w1 = new WeatherObservation("Sydney", "2016-02-01", 32.0, 45.0, 11.0, 10.5);
         history.addObservation(w1);
 
         // save it to file!
-        history.saveToFile("savedObservations.txt");
+        System.out.println(history);
+        history.saveToFile("temp/savedObservations.txt");
 
         // testing try/catch
         if (history.loadFromFile("doesnotexist.fail")) {
