@@ -110,10 +110,15 @@ public class WeatherHistory implements Serializable {
             fileReader = new FileReader(theFile);
             reader = new BufferedReader(fileReader);
 
-            // first line just the header
-            line = reader.readLine();
+            /* NOTE: lecture slides allude to the input file being tab deliminated,
+             *       but sample file given only contains spaces.
+             *       Due to this, and the fact that place names can have spaces, this regex solution is used.
+             *       Any combination of tabs/spaces are handled, as long as the correct order is kept in file data.
+             */
+            Pattern format = Pattern.compile("^\\s*(.+?)\\s+(\\d{1,2}/\\d{1,2}/\\d{4})\\s+([^\\s]+\\s+[^\\s]+\\s+[^\\s]+\\s+[^\\s]+)\\s*$");
 
-            Pattern format = Pattern.compile("^(.+)\\s+(\\d+/\\d+/\\d+)\\s+(.*)$");
+            // also handle comments, headers, and blank lines!
+            Pattern comment = Pattern.compile("^\\s*(place\\s+date\\s+temperature\\s+humidity\\s+uvindex\\s+windspeed|#.*|//.*|)\\s*$", Pattern.CASE_INSENSITIVE);
             ArrayList<WeatherObservation> tempArray = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
@@ -123,7 +128,7 @@ public class WeatherHistory implements Serializable {
                     Date dateDate = new SimpleDateFormat("dd/mm/yyyy").parse(m.group(2));
                     String date = new SimpleDateFormat("yyyy-mm-dd").format(dateDate);
 
-                    String[] other = m.group(3).split(" ");
+                    String[] other = m.group(3).split("\\s+");
                     Double temperature = Double.parseDouble(other[0]);
                     Double humidity = Double.parseDouble(other[1]);
                     Double uvIndex = Double.parseDouble(other[2]);
@@ -131,6 +136,8 @@ public class WeatherHistory implements Serializable {
 
                     WeatherObservation w = new WeatherObservation(place, date, temperature, humidity, uvIndex, windSpeed);
                     tempArray.add(w);
+                } else if (comment.matcher(line).matches()) {
+                    // ignore
                 } else {
                     throw new ParseException("Invalid format in file.", -1);
                 }
