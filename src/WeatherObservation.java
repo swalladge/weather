@@ -1,15 +1,18 @@
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
-public class WeatherObservation {
+public class WeatherObservation implements Serializable {
     private String place = "";
     private Date date = new Date();
     private Double temperature = 0.0;
     private Double humidity = 0.0;
     private Double uvIndex = 0.0;
     private Double windSpeed = 0.0;
+    private static Logger logger = Logger.getLogger(WeatherObservation.class.getName());
 
     public WeatherObservation() {
 
@@ -37,8 +40,17 @@ public class WeatherObservation {
         return format.format(this.date);
     }
 
+    public String getNormalDate() {
+        SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyyy");
+        return format.format(this.date);
+    }
+
     public void setDate(String date) throws ParseException {
         this.date = new SimpleDateFormat("yyyy-mm-dd").parse(date);
+    }
+
+    public void setNormalDate(String date) throws ParseException {
+        this.date = new SimpleDateFormat("dd/mm/yyyy").parse(date);
     }
 
     public String getPlace() {
@@ -91,5 +103,9 @@ public class WeatherObservation {
                 dFormat.format(windSpeed) + "km/h wind speed";
 
         return output;
+    }
+
+    public String formattedString() {
+        return String.format("%s %s %s %s %s %s", place, getNormalDate(), temperature, humidity, uvIndex, windSpeed);
     }
 }
