@@ -160,6 +160,37 @@ public class WeatherHistory implements Serializable {
         return false;
     }
 
+    public Boolean saveToFile(String filename) {
+        File theFile = new File(filename);
+        FileWriter fileWrite = null;
+        BufferedWriter writer = null;
+
+        try {
+            writer = new BufferedWriter(new FileWriter(theFile));
+            writer.write("Place Data Temperature Humidity UVIndex WindSpeed\n");
+            for (WeatherObservation w: this.history) {
+                writer.write(w.formattedString() + "\n");
+            }
+
+            return true;
+
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+        } finally {
+
+            try {
+               if (writer != null) {
+                   writer.close();
+               }
+            }
+            catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public String toString() {
         String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";

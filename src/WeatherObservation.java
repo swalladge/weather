@@ -104,4 +104,8 @@ public class WeatherObservation implements Serializable {
 
         return output;
     }
+
+    public String formattedString() {
+        return String.format("%s %s %s %s %s %s", place, getNormalDate(), temperature, humidity, uvIndex, windSpeed);
+    }
 }
