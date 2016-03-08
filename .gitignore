@@ -73,3 +73,6 @@ gradle/
 
 # temporary directory for testing, output stuff, etc.
 temp/*
+
+# javadocs
+/doc/
