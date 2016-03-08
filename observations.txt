@@ -1,0 +1,6 @@
+Place Date Temperature Humidity UVIndex WindSpeed
+Darwin 1/01/2015 33.4 83 14 35
+Daly River 1/01/2015 39 71 16 5
+Berrimah 23/12/2014 37.5 67 15 7
+Katherine 24/01/2015 39 42 13 2
+Alice Springs 24/01/2015 34 62 5 4

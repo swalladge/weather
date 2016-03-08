@@ -95,6 +95,38 @@ public class WeatherHistory implements Serializable {
         return true;
     }
 
+    public Boolean loadFromFile(String filename) {
+        File theFile = new File(filename);
+        FileReader fileReader = null;
+        BufferedReader reader = null;
+        String line = null;
+
+        try {
+            fileReader = new FileReader(theFile);
+            reader = new BufferedReader(fileReader);
+
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            return true;
+
+        } catch (FileNotFoundException e) {
+            logger.log(Level.SEVERE, "File Not Found [{0}]", e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+        } finally {
+            try {
+                if (fileReader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
