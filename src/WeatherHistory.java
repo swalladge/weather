@@ -58,13 +58,13 @@ public class WeatherHistory implements Serializable {
 
     /**
      * serializes the history ArrayList to file
-     * @param file - file to save to
-     * @return returns true if able to save
+     * @param filename file to save to
+     * @return returns true if able to save, else false
      */
-    public Boolean saveToSerialized(String file) {
+    public Boolean saveToSerialized(String filename) {
 
         try {
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file));
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(filename));
             os.writeObject(this.history);
             os.close();
         } catch (IOException e) {
@@ -76,12 +76,12 @@ public class WeatherHistory implements Serializable {
 
     /**
      * loads the previously saved serialized history list
-     * @param file - file to load from
+     * @param filename file to load from
      * @return returns true if successful load
      */
-    public Boolean loadFromSerialized(String file) {
+    public Boolean loadFromSerialized(String filename) {
         try {
-            ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
+            ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
             ArrayList temp = null;
             try {
                 temp = (ArrayList) is.readObject();
@@ -100,7 +100,7 @@ public class WeatherHistory implements Serializable {
         return true;
     }
 
-    public Boolean loadFromFile(String filename) {
+    private ArrayList<WeatherObservation> getDataFromFile(String filename) {
         File theFile = new File(filename);
         FileReader fileReader = null;
         BufferedReader reader = null;
@@ -144,8 +144,7 @@ public class WeatherHistory implements Serializable {
             }
 
             // actually update the history array now no exception found
-            this.history = tempArray;
-            return true;
+            return tempArray;
 
         } catch (FileNotFoundException e) {
             logger.log(Level.SEVERE, "File Not Found [{0}]", e.getMessage());
@@ -164,9 +163,42 @@ public class WeatherHistory implements Serializable {
             }
 
         }
-        return false;
+        return null;
     }
 
+    /**
+     * Loads weather history from file - overwrites all current data
+     * @param filename name of file to read from
+     * @return returns true if successful, else false
+     */
+    public Boolean loadFromFile(String filename) {
+        ArrayList<WeatherObservation> data = this.getDataFromFile(filename);
+        if (data == null) {
+            return false;
+        }
+        this.history = data;
+        return true;
+    }
+
+    /**
+     * adds all observations from file to current history - doesn't overwrite
+     * @param filename name of file to read from
+     * @return returns true if successful, else false
+     */
+    public Boolean addFromFile(String filename) {
+        ArrayList<WeatherObservation> data = this.getDataFromFile(filename);
+        if (data == null) {
+            return false;
+        }
+        this.history.addAll(data);
+        return true;
+    }
+
+    /**
+     * Saves current history to file
+     * @param filename name of file to save to
+     * @return returns true if successful save, else false
+     */
     public Boolean saveToFile(String filename) {
         File theFile = new File(filename);
         FileWriter fileWrite = null;

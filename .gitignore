@@ -71,3 +71,8 @@ gradle/
 # random serialized data files
 *.ser
 
+# temporary directory for testing, output stuff, etc.
+temp/*
+
+# javadocs
+/doc/
