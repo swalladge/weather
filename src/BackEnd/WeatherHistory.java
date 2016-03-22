@@ -1,5 +1,10 @@
 package BackEnd;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,9 +26,41 @@ public class WeatherHistory implements Serializable, Database {
     @Override
     public void loadObservationsFromHTMLFile() {
 
-        String file = "observations.html";
+        String filename = "observations.html";
+        File theFile = new File(filename);
+
+        try {
+            Document document = Jsoup.parse(theFile, "UTF-8", "");
+            Elements entries = document.getElementsByTag("tr");
+            boolean firstEntry = true;
+            for (Element entry : entries) {
+                // ignore first entry - it's the table header
+                if (firstEntry) {
+                    firstEntry = false;
+                    continue;
+                }
+
+                String place = entry.child(0).text();
+                String date  = entry.child(1).text();
+                Double temperature = Double.parseDouble(entry.child(2).text());
+                Double humidity = Double.parseDouble(entry.child(3).text());
+                Double uvIndex = Double.parseDouble(entry.child(4).text());
+                Double windSpeed = Double.parseDouble(entry.child(5).text());
+
+                WeatherObservation obs = new WeatherObservation(place, date, temperature, humidity, uvIndex, windSpeed);
+                this.addObservation(obs);
+
+            }
 
 
+
+        } catch (FileNotFoundException e) {
+            logger.log(Level.SEVERE, "File Not Found [{0}]", e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+        } catch (ParseException e) {
+            logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
+        }
 
     }
 
@@ -170,7 +207,7 @@ public class WeatherHistory implements Serializable, Database {
                 if (m.matches()) {
                     String place = m.group(1);
                     Date dateDate = new SimpleDateFormat("dd/mm/yyyy").parse(m.group(2));
-                    String date = new SimpleDateFormat("yyyy-mm-dd").format(dateDate);
+                    String date = new SimpleDateFormat("dd/mm/yyyy").format(dateDate);
 
                     String[] other = m.group(3).split("\\s+");
                     Double temperature = Double.parseDouble(other[0]);

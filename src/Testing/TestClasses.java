@@ -16,10 +16,10 @@ public class TestClasses {
         logger.getParent().setLevel(Level.ALL);
 
         // init a few weather observations (made up)
-        WeatherObservation w1 = new WeatherObservation("Sydney", "2016-02-01", 32.0, 45.0, 11.0, 10.5);
-        WeatherObservation w2 = new WeatherObservation("Alice Sprints", "2016-01-03", 42.0, 8.0, 17.0, 15.3);
-        WeatherObservation w3 = new WeatherObservation("Broken Hill", "2016-02-16", 31.0, 25.0, 15.0, 10.5);
-        WeatherObservation w4 = new WeatherObservation("Adelaide", "2016-01-24", 35.0, 20.0, 12.0, 21.0);
+        WeatherObservation w1 = new WeatherObservation("Sydney", "01/02/2016", 32.0, 45.0, 11.0, 10.5);
+        WeatherObservation w2 = new WeatherObservation("Alice Sprints", "01/03/2016", 42.0, 8.0, 17.0, 15.3);
+        WeatherObservation w3 = new WeatherObservation("Broken Hill", "02/16/2016", 31.0, 25.0, 15.0, 10.5);
+        WeatherObservation w4 = new WeatherObservation("Adelaide", "24/01/2016", 35.0, 20.0, 12.0, 21.0);
 
         // build a history of observations
         WeatherHistory history = new WeatherHistory();
@@ -37,7 +37,7 @@ public class TestClasses {
         WeatherObservation fixThis = history.getObservation(1);
         System.out.println("Broken? - " + fixThis);
         fixThis.setHumidity(15.0);
-        fixThis.setDate("2016-01-12");
+        fixThis.setISODate("2016-01-12");
         fixThis.setPlace("Alice Springs");
         System.out.println("Fixed?  - " + fixThis);
 
@@ -50,7 +50,7 @@ public class TestClasses {
         Random generator = new Random();
 
         WeatherObservation obs1 = history.getObservation(generator.nextInt(history.getHistorySize()));
-        System.out.printf("Random correlation: wind speed was %skm/h on %s in %s!%n", obs1.getWindSpeed(), obs1.getISOdate(), obs1.getPlace());
+        System.out.printf("Random correlation: wind speed was %skm/h on %s in %s!%n", obs1.getWindSpeed(), obs1.getISODate(), obs1.getPlace());
 
         WeatherObservation obs2 = history.getObservation(generator.nextInt(history.getHistorySize()));
         System.out.printf("Random correlation: relative humidity was %s%% on a %s degree day in %s!%n", obs2.getHumidity(), obs2.getTemperature(), obs2.getPlace());

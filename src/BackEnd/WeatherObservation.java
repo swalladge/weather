@@ -25,7 +25,7 @@ public class WeatherObservation implements Serializable {
 
         // this constructor uses a string for the date for ease of testing
         // - unsure of how will be used in future, so storing as date object
-        this.date = new SimpleDateFormat("yyyy-mm-dd").parse(date);
+        this.date = new SimpleDateFormat("dd/mm/yyyy").parse(date);
 
         this.temperature = temperature;
         this.humidity = humidity;
@@ -37,7 +37,7 @@ public class WeatherObservation implements Serializable {
         return date;
     }
 
-    public String getISOdate() {
+    public String getISODate() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         return format.format(this.date);
     }
@@ -47,7 +47,7 @@ public class WeatherObservation implements Serializable {
         return format.format(this.date);
     }
 
-    public void setDate(String date) throws ParseException {
+    public void setISODate(String date) throws ParseException {
         this.date = new SimpleDateFormat("yyyy-mm-dd").parse(date);
     }
 
@@ -98,7 +98,7 @@ public class WeatherObservation implements Serializable {
     @Override
     public String toString() {
         DecimalFormat dFormat = new DecimalFormat("0.#");
-        String output = place + " on " + this.getISOdate() + " the weather was: " +
+        String output = place + " on " + this.getISODate() + " the weather was: " +
                 dFormat.format(temperature) + "°C, " +
                 dFormat.format(humidity) + " RH, " +
                 dFormat.format(uvIndex) + " UV, " +

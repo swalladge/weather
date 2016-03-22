@@ -22,6 +22,8 @@ public class GUI {
 
     public void showGUI() {
         //TODO: show the gui and get started!
+        db.loadObservationsFromHTMLFile();
+        System.out.println(db.toString());
     }
 
 }

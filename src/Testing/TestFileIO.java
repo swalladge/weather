@@ -28,7 +28,7 @@ public class TestFileIO {
         System.out.println(history);
 
         // add another observation
-        WeatherObservation w1 = new WeatherObservation("Sydney", "2016-02-01", 32.0, 45.0, 11.0, 10.5);
+        WeatherObservation w1 = new WeatherObservation("Sydney", "01/02/2016", 32.0, 45.0, 11.0, 10.5);
         history.addObservation(w1);
 
         // save it to file!
