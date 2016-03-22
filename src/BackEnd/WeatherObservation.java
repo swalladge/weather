@@ -97,12 +97,13 @@ public class WeatherObservation implements Serializable {
 
     @Override
     public String toString() {
-        DecimalFormat dFormat = new DecimalFormat("0.#");
-        String output = place + " on " + this.getISODate() + " the weather was: " +
-                dFormat.format(temperature) + "°C, " +
-                dFormat.format(humidity) + " RH, " +
-                dFormat.format(uvIndex) + " UV, " +
-                dFormat.format(windSpeed) + "km/h wind speed";
+        //DecimalFormat dFormat = new DecimalFormat("##0.0");
+        String dFormat = "%4.1f";
+        String output = place + " on " + this.getISODate() + ": " +
+                String.format(dFormat, temperature) + "°C, " +
+                String.format(dFormat, humidity) + " RH, " +
+                String.format(dFormat, uvIndex) + " UV, " +
+                String.format(dFormat, windSpeed) + "km/h wind speed";
 
         return output;
     }

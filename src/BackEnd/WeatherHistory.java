@@ -66,14 +66,17 @@ public class WeatherHistory implements Serializable, Database {
 
     @Override
     public String getObservations() {
-        //TODO: suppose this should be in some other format?
+        if (this.history.size() == 0) {
+            return null;
+        }
         return this.toString();
     }
 
 
     @Override
     public String toString() {
-        String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
+        //String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
+        String output = "| " + this.getHistorySize() + " weather observations\n";
 
         int max = 0;
 
@@ -90,7 +93,6 @@ public class WeatherHistory implements Serializable, Database {
             int padding = max - place.length();
             output = output + "|- " + this.gen_padding(padding) + o + "\n";
         }
-        output += "--------------";
 
         return output;
 
