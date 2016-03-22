@@ -20,7 +20,11 @@ public class WeatherHistory implements Serializable, Database {
 
     @Override
     public void loadObservationsFromHTMLFile() {
-        //TODO
+
+        String file = "observations.html";
+
+
+
     }
 
     @Override
