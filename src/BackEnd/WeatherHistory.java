@@ -1,3 +1,5 @@
+package BackEnd;
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,13 +10,51 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WeatherHistory implements Serializable {
+public class WeatherHistory implements Serializable, Database {
     ArrayList<WeatherObservation> history = new ArrayList<>();
     private static Logger logger = Logger.getLogger(WeatherHistory.class.getName());
 
     public WeatherHistory() {
 
     }
+
+    @Override
+    public void loadObservationsFromHTMLFile() {
+        //TODO
+    }
+
+    @Override
+    public String getObservations() {
+        //TODO: suppose this should be in some other format?
+        return this.toString();
+    }
+
+
+    @Override
+    public String toString() {
+        String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
+
+        int max = 0;
+
+        for (WeatherObservation item: history) {
+            String place = item.getPlace();
+            int i = place.length();
+            if (i > max) {
+                max = i;
+            }
+        }
+
+        for (WeatherObservation o: history) {
+            String place = o.getPlace();
+            int padding = max - place.length();
+            output = output + "|- " + this.gen_padding(padding) + o + "\n";
+        }
+        output += "--------------";
+
+        return output;
+
+    }
+
 
     public ArrayList<WeatherObservation> getHistory() {
         return history;
@@ -218,9 +258,9 @@ public class WeatherHistory implements Serializable {
         } finally {
 
             try {
-               if (writer != null) {
-                   writer.close();
-               }
+                if (writer != null) {
+                    writer.close();
+                }
             }
             catch (IOException e) {
                 logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
@@ -230,28 +270,4 @@ public class WeatherHistory implements Serializable {
         return false;
     }
 
-    @Override
-    public String toString() {
-        String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
-
-        int max = 0;
-
-        for (WeatherObservation item: history) {
-            String place = item.getPlace();
-            int i = place.length();
-            if (i > max) {
-                max = i;
-            }
-        }
-
-        for (WeatherObservation o: history) {
-            String place = o.getPlace();
-            int padding = max - place.length();
-            output = output + "|- " + this.gen_padding(padding) + o + "\n";
-        }
-        output += "--------------";
-
-        return output;
-
-    }
 }
