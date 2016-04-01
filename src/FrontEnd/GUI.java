@@ -103,13 +103,8 @@ public class GUI implements ActionListener {
             Object[][] data = new Object[observations.size()][6];
 
 
-            // comparator for sorting list of weather observations by date
-            Comparator<WeatherObservation> sortByDate = new Comparator<WeatherObservation>() {
-                public int compare(WeatherObservation c1, WeatherObservation c2) {
-                    return c2.getDateAsInt() - c1.getDateAsInt();
-                }
-            };
-            Collections.sort(obs, sortByDate);
+            // sort list of weather observations by date
+            Collections.sort(obs);
 
             int i = 0;
             for (WeatherObservation o : obs) {

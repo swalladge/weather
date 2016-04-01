@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
 
-public class WeatherObservation implements Serializable {
+public class WeatherObservation implements Serializable, Comparable<WeatherObservation> {
     private String place = "";
     private Date date = new Date();
     private Double temperature = 0.0;
@@ -45,6 +45,17 @@ public class WeatherObservation implements Serializable {
     public Integer getDateAsInt() {
         SimpleDateFormat format = new SimpleDateFormat("yyyymmdd");
         return Integer.parseInt(format.format(this.date));
+    }
+
+    @Override
+    public int compareTo(WeatherObservation other) {
+        // sorts by date (newest first)
+        int d1 = other.getDateAsInt();
+        int d2 = this.getDateAsInt();
+        if (d1 == d2) {
+            return this.getPlace().compareTo(other.getPlace());
+        }
+        return d1 - d2;
     }
 
     public String getNormalDate() {
