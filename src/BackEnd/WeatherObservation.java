@@ -42,6 +42,11 @@ public class WeatherObservation implements Serializable {
         return format.format(this.date);
     }
 
+    public Integer getDateAsInt() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyymmdd");
+        return Integer.parseInt(format.format(this.date));
+    }
+
     public String getNormalDate() {
         SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyyy");
         return format.format(this.date);

@@ -9,8 +9,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 /**
@@ -25,6 +29,7 @@ public class GUI implements ActionListener {
     JButton displayButton = new JButton("Display");
     JScrollPane scrollPane;
     JTable dataTable;
+    JEditorPane displayText;
 
     Database db = null;
 
@@ -34,6 +39,13 @@ public class GUI implements ActionListener {
         displayButton.addActionListener(this);
 
         scrollPane = new JScrollPane();
+
+        displayText = new JEditorPane();
+        displayText.setContentType("text/html");
+        displayText.setText("<h2>Welcome to the weather observation viewer!</h2><h3>Press <i>load</i> to load the weather data, then <i>display</i> to view it!</h3>");
+        displayText.setEditable(false);
+
+        scrollPane.setViewportView(displayText);
 
         // bottom panel
         bottom.setAlignmentX(1);
@@ -83,16 +95,24 @@ public class GUI implements ActionListener {
 
     private void displayTable() {
         Collection<WeatherObservation> observations = db.getObservations();
+        List<WeatherObservation> obs = new ArrayList<>(observations);
         if (observations.isEmpty()) {
-
-            // TODO: display message about no data
-
+            JOptionPane.showMessageDialog (null, "No weather observations have been loaded! Try clicking 'Load' to load from the html file first.", "Info", JOptionPane.INFORMATION_MESSAGE);
         } else {
             String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
             Object[][] data = new Object[observations.size()][6];
 
+
+            // comparator for sorting list of weather observations by date
+            Comparator<WeatherObservation> sortByDate = new Comparator<WeatherObservation>() {
+                public int compare(WeatherObservation c1, WeatherObservation c2) {
+                    return c2.getDateAsInt() - c1.getDateAsInt();
+                }
+            };
+            Collections.sort(obs, sortByDate);
+
             int i = 0;
-            for (WeatherObservation o : observations) {
+            for (WeatherObservation o : obs) {
                 ArrayList<Object> odata = new ArrayList<>();
                 data[i][0] = o.getPlace();
                 data[i][1] = o.getNormalDate();
@@ -117,4 +137,3 @@ public class GUI implements ActionListener {
         }
     }
 }
-
