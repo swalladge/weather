@@ -5,7 +5,7 @@ import FrontEnd.GUI;
 /**
  * The main class - run this file for the main program!
  */
-public class Main {
+public class Weather {
 
     public static void main(String[] args) {
 
