@@ -1,11 +1,13 @@
 package FrontEnd;
 
 import BackEnd.Database;
+import BackEnd.WeatherObservation;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 
 /**
  * The user interface class - this sets up the gui, connects to the database, adds the listeners, etc.
@@ -17,8 +19,8 @@ public class GUI implements ActionListener {
     JPanel bottom = new JPanel();
     JButton loadButton = new JButton("Load");
     JButton displayButton = new JButton("Display");
-    JTextArea dataTable = new JTextArea();
-    JScrollPane scrollPane = new JScrollPane();
+    JScrollPane scrollPane;
+    JTable dataTable = new JTable();
 
     Database db = null;
 
@@ -28,10 +30,6 @@ public class GUI implements ActionListener {
          displayButton.addActionListener(this);
 
          // the table of data (currently a textarea)
-         dataTable = new JTextArea(5, 20);
-         dataTable.setEditable(false);
-         dataTable.setLineWrap(false);
-         dataTable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
          scrollPane = new JScrollPane(dataTable);
 
          // bottom panel
@@ -80,11 +78,11 @@ public class GUI implements ActionListener {
     }
 
     private void displayTable() {
-        String observations = db.getObservations();
-        if (observations == null) {
-            dataTable.setText("No weather data loaded!");
+        Collection<WeatherObservation> observations = db.getObservations();
+        if (observations.isEmpty()) {
+            // TODO: message about no data loaded yet
         } else {
-            dataTable.setText(observations);
+            // TODO: load data into table
         }
     }
 }

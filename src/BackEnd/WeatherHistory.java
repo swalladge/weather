@@ -9,6 +9,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,11 +66,8 @@ public class WeatherHistory implements Serializable, Database {
     }
 
     @Override
-    public String getObservations() {
-        if (this.history.size() == 0) {
-            return null;
-        }
-        return this.toString();
+    public Collection<WeatherObservation> getObservations() {
+        return this.getHistory();
     }
 
 
