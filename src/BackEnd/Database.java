@@ -11,4 +11,6 @@ public interface Database {
 
     public Collection<WeatherObservation> getObservations();
 
+    public Collection<WeatherObservation> checkWeatherByDate(String date);
+
 }
