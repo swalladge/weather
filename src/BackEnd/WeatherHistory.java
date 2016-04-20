@@ -53,8 +53,30 @@ class Node {
 
     @Override
     public String toString() {
-        // TODO
-        return "";
+        String s = "";
+        if (leftChild != null) {
+            s += leftChild.toString();
+        }
+        for (WeatherObservation o: obs) {
+            s += o + "\n";
+        }
+        if (rightChild != null) {
+            s += rightChild.toString();
+        }
+
+        return s;
+
+    }
+
+    public Integer size() {
+        Integer sum = 1;
+        if (leftChild != null) {
+            sum += leftChild.size();
+        }
+        if (rightChild != null) {
+            sum += rightChild.size();
+        }
+        return sum;
     }
 
     public ArrayList<WeatherObservation> search(Date d) {
@@ -86,7 +108,7 @@ class Node {
 
 
 public class WeatherHistory implements Serializable, Database {
-    ArrayList<WeatherObservation> history = new ArrayList<>();
+    Node history = null;
     private static Logger logger = Logger.getLogger(WeatherHistory.class.getName());
 
     public WeatherHistory() {
@@ -131,7 +153,6 @@ public class WeatherHistory implements Serializable, Database {
         } catch (ParseException e) {
             logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
         }
-
     }
 
     @Override
@@ -148,57 +169,32 @@ public class WeatherHistory implements Serializable, Database {
 
     @Override
     public String toString() {
-        //String output = "--------------\n| WeatherHistory\n| " + this.getHistorySize() + " weather observations\n";
-        String output = "| " + this.getHistorySize() + " weather observations\n";
-
-        int max = 0;
-
-        for (WeatherObservation item: history) {
-            String place = item.getPlace();
-            int i = place.length();
-            if (i > max) {
-                max = i;
-            }
+        if (history == null) {
+            return "No observations loaded!";
         }
-
-        for (WeatherObservation o: history) {
-            String place = o.getPlace();
-            int padding = max - place.length();
-            output = output + "|- " + this.gen_padding(padding) + o + "\n";
-        }
-
-        return output;
-
+        return history.toString();
     }
 
 
-    public ArrayList<WeatherObservation> getHistory() {
-        return history;
+    public Collection<WeatherObservation> getHistory() {
+        if (history == null) {
+            return new ArrayList<WeatherObservation>();
+        }
+        return history.traverse();
     }
 
     public void addObservation(WeatherObservation w) {
-        history.add(w);
-    }
-
-    public void insertObservation(int index, WeatherObservation w) {
-        history.add(index, w);
+        if (history == null) {
+            history = new Node(w);
+        } else {
+            history.insert(w);
+        }
     }
 
     public Integer getHistorySize() {
         return history.size();
     }
 
-    public WeatherObservation getObservation(int index) {
-        return history.get(index);
-    }
-
-    public void setObservation(int index, WeatherObservation w) {
-        history.set(index, w);
-    }
-
-    public void removeObservation(int index) {
-        history.remove(index);
-    }
 
     private String gen_padding(int length) {
         StringBuilder s = new StringBuilder();
@@ -209,7 +205,7 @@ public class WeatherHistory implements Serializable, Database {
     }
 
     public void clear() {
-        this.history.clear();
+        this.history = null;
     }
 
     /**
@@ -238,9 +234,9 @@ public class WeatherHistory implements Serializable, Database {
     public Boolean loadFromSerialized(String filename) {
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
-            ArrayList temp = null;
+            Node temp = null;
             try {
-                temp = (ArrayList) is.readObject();
+                temp = (Node) is.readObject();
             } catch (ClassNotFoundException e) {
                 logger.log(Level.SEVERE, "ClassNotFoundException [{0}]", e.getMessage());
                 return false;
@@ -332,7 +328,12 @@ public class WeatherHistory implements Serializable, Database {
         if (data == null) {
             return false;
         }
-        this.history = data;
+        for (WeatherObservation o: data) {
+            if (history == null) {
+                history = new Node(o);
+            }
+            history.insert(o);
+        }
         return true;
     }
 
@@ -346,7 +347,12 @@ public class WeatherHistory implements Serializable, Database {
         if (data == null) {
             return false;
         }
-        this.history.addAll(data);
+        for (WeatherObservation o: data) {
+            if (history == null) {
+                history = new Node(o);
+            }
+            history.insert(o);
+        }
         return true;
     }
 
@@ -363,7 +369,7 @@ public class WeatherHistory implements Serializable, Database {
         try {
             writer = new BufferedWriter(new FileWriter(theFile));
             writer.write("Place Data Temperature Humidity UVIndex WindSpeed\n");
-            for (WeatherObservation w: this.history) {
+            for (WeatherObservation w: history.traverse()) {
                 writer.write(w.formattedString() + "\n");
             }
 

@@ -159,9 +159,9 @@ public class GUI implements ActionListener {
             String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
             Object[][] data = new Object[observations.size()][6];
 
-
             // sort list of weather observations by date
-            Collections.sort(obs);
+            // - note: no longer needed as the observations are autosorted by date
+            // Collections.sort(obs);
 
             int i = 0;
             for (WeatherObservation o : obs) {
@@ -180,6 +180,8 @@ public class GUI implements ActionListener {
                     return false;
                 }
             };
+            scrollPane.setViewportView(dataTable);
+            dataTable.setFillsViewportHeight(true);
 
         }
     }

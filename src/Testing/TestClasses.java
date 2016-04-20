@@ -27,45 +27,17 @@ public class TestClasses {
         history.addObservation(w2);
         history.addObservation(w4);
 
-        // test insert
-        history.insertObservation(2, w3);
-
         // see what it looks like!
         System.out.println(history);
 
-        // let's get an observation and play with it
-        WeatherObservation fixThis = history.getObservation(1);
-        System.out.println("Broken? - " + fixThis);
-        fixThis.setHumidity(15.0);
-        fixThis.setISODate("2016-01-12");
-        fixThis.setPlace("Alice Springs");
-        System.out.println("Fixed?  - " + fixThis);
-
 
         // nah broken beyond repair
-        history.removeObservation(1);
         System.out.println(history);
-
-        // get some random stats
-        Random generator = new Random();
-
-        WeatherObservation obs1 = history.getObservation(generator.nextInt(history.getHistorySize()));
-        System.out.printf("Random correlation: wind speed was %skm/h on %s in %s!%n", obs1.getWindSpeed(), obs1.getISODate(), obs1.getPlace());
-
-        WeatherObservation obs2 = history.getObservation(generator.nextInt(history.getHistorySize()));
-        System.out.printf("Random correlation: relative humidity was %s%% on a %s degree day in %s!%n", obs2.getHumidity(), obs2.getTemperature(), obs2.getPlace());
 
         // save the weather history as it is currently
         System.out.println("saving history");
         String saveFile = "serializeddata.ser";
         history.saveToSerialized(saveFile);
-        System.out.println(history);
-
-        // remove some observations
-        System.out.println("removing some history");
-        history.removeObservation(0);
-        history.removeObservation(0);
-        history.removeObservation(0);
         System.out.println(history);
 
         // load the previously saved data
