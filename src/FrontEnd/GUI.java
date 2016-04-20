@@ -4,19 +4,12 @@ import BackEnd.Database;
 import BackEnd.WeatherObservation;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-
-import static sun.awt.X11.XConstants.buttons;
 
 
 /**
@@ -25,7 +18,7 @@ import static sun.awt.X11.XConstants.buttons;
 public class GUI implements ActionListener {
 
     JFrame frame = new JFrame();
-    JPanel drawPanel = new JPanel();
+    animatedJPanel drawPanel = new animatedJPanel();
     JPanel searchPanel = new JPanel();
     JButton loadButton = new JButton("Load");
     JButton displayButton = new JButton("Display");
@@ -79,6 +72,8 @@ public class GUI implements ActionListener {
         content.add(displayButton);
 
         // line up everything with spring layout
+        layout.putConstraint(SpringLayout.WEST, scrollPane, 10, SpringLayout.WEST, frame);
+        layout.putConstraint(SpringLayout.NORTH, scrollPane, 10, SpringLayout.NORTH, frame);
         layout.putConstraint(SpringLayout.NORTH, searchPanel, 10, SpringLayout.SOUTH, scrollPane);
         layout.putConstraint(SpringLayout.EAST, searchPanel, 0, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.WEST, drawPanel, 10, SpringLayout.EAST, scrollPane);
@@ -90,9 +85,12 @@ public class GUI implements ActionListener {
         // frame
         frame.pack();
         frame.setTitle("Weather Observations");
-        frame.setSize(800, 600);
+        frame.setSize(1200, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        Thread painting = new Thread(drawPanel);
+        painting.start();
+        //new javax.swing.Timer(40, drawPanel).start();
     }
 
     public void setDB(Database db) {
@@ -152,4 +150,48 @@ public class GUI implements ActionListener {
             dataTable.setFillsViewportHeight(true);
         }
     }
+
+    private class animatedJPanel extends JPanel implements ActionListener, Runnable {
+        final int rightBound = 500;
+        final int lowerBound = 500;
+        long offset = 0;
+        long startTime = (new Date()).getTime();
+
+        @Override
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            // TODO: split drawing out into a separate class - and add methods to that for rain, sunshine, etc.
+            Graphics2D pen = (Graphics2D) g;
+
+            pen.setColor(Color.blue);
+
+            offset = ((new Date()).getTime() - startTime);
+            pen.fillOval(30,(int) (30+offset/30)%lowerBound, 10, 20);
+            pen.fillOval(90,(int) (20+offset/40)%lowerBound, 10, 20);
+            pen.fillOval(200,(int) (20+offset/10)%lowerBound, 10, 20);
+            pen.fillOval(230,(int) (50+offset/80)%lowerBound, 15, 30);
+
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            // update animation here
+            repaint();
+
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                repaint();
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }
