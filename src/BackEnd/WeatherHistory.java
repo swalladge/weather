@@ -36,7 +36,7 @@ class Node {
     public void insert(WeatherObservation o) {
         if (o.getDate().compareTo(date) == 0) {
             obs.add(o);
-        } else if (o.getDate().compareTo(date) < 0) {
+        } else if (o.getDate().compareTo(date) > 0) {
             if (rightChild == null) {
                 rightChild = new Node(o);
             } else {
@@ -80,7 +80,7 @@ class Node {
     }
 
     public ArrayList<WeatherObservation> search(Date d) {
-        if (d == date) {
+        if (d.compareTo(date) == 0) {
             return obs;
         } else if (d.compareTo(date) > 0 && rightChild != null) {
             return rightChild.search(d);
@@ -162,8 +162,23 @@ public class WeatherHistory implements Serializable, Database {
 
     @Override
     public Collection<WeatherObservation> checkWeatherByDate(String date) {
-        // TODO: convert date to date object, search this.history for matches, return collection of weatherobservations
-        return this.getHistory();
+
+        // make sure history is loaded
+        if (history == null) {
+            return null;
+        }
+        Date d;
+        try {
+            d = new SimpleDateFormat("dd/mm/yyyy").parse(date);
+        } catch (ParseException e) {
+            try {
+                d = new SimpleDateFormat("yyyy-mm-dd").parse(date);
+            } catch (ParseException e2) {
+                logger.log(Level.WARNING, "unrecognized date format - returning null");
+                return null;
+            }
+        }
+        return history.search(d);
     }
 
 

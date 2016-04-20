@@ -69,7 +69,7 @@ public class GUI implements ActionListener {
         // setup the drawing panel
         Dimension d = new Dimension(500, 500);
         drawPanel.setPreferredSize(d);
-        // TODO: setup drawing stuff, timers, load images, etc.
+        // TODO: init class for drawing here now
 
         // we have a layout now
         SpringLayout layout = new SpringLayout();
@@ -129,7 +129,7 @@ public class GUI implements ActionListener {
             db.loadObservationsFromHTMLFile();
             this.loadButton.setText("Loaded");
         } else if (actionEvent.getActionCommand() == "Display") {
-            displayTable(db.getObservations());
+            displayObservations();
         } else if (actionEvent.getActionCommand() == "Search") {
             performSearch(searchText.getText());
         } else if (actionEvent.getActionCommand() == "Toggle animation") {
@@ -140,50 +140,52 @@ public class GUI implements ActionListener {
     private void performSearch(String text) {
         Collection<WeatherObservation> observations;
 
-        // TODO: process and format date text
-
         observations = db.checkWeatherByDate(text);
-
-        // TODO: if no observations display message?
-
-        displayTable(observations);
+        if (observations == null) {
+            // TODO: something
+        } else {
+            displayTable(observations);
+        }
 
     }
 
+    private void displayObservations() {
+        Collection<WeatherObservation> o = db.getObservations();
+        if (o.isEmpty()) {
+            JOptionPane.showMessageDialog (null, "No weather observations have been loaded! Try clicking 'Load' to load from the html file first.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            displayTable(o);
+        }
+    }
 
     private void displayTable(Collection<WeatherObservation> observations) {
         List<WeatherObservation> obs = new ArrayList<>(observations);
-        if (observations.isEmpty()) {
-            JOptionPane.showMessageDialog (null, "No weather observations have been loaded! Try clicking 'Load' to load from the html file first.", "Info", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
-            Object[][] data = new Object[observations.size()][6];
+        String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
+        Object[][] data = new Object[observations.size()][6];
 
-            // sort list of weather observations by date
-            // - note: no longer needed as the observations are autosorted by date
-            // Collections.sort(obs);
+        // sort list of weather observations by date
+        // - note: no longer needed as the observations are autosorted by date
+        Collections.sort(obs);
 
-            int i = 0;
-            for (WeatherObservation o : obs) {
-                ArrayList<Object> odata = new ArrayList<>();
-                data[i][0] = o.getPlace();
-                data[i][1] = o.getNormalDate();
-                data[i][2] = o.getTemperature();
-                data[i][3] = o.getHumidity();
-                data[i][4] = o.getUvIndex();
-                data[i][5] = o.getWindSpeed();
-                i++;
-            }
-
-            dataTable = new JTable(data, columns) {
-                public boolean isCellEditable(int row,int column){
-                    return false;
-                }
-            };
-            scrollPane.setViewportView(dataTable);
-            dataTable.setFillsViewportHeight(true);
-
+        int i = 0;
+        for (WeatherObservation o : obs) {
+            ArrayList<Object> odata = new ArrayList<>();
+            data[i][0] = o.getPlace();
+            data[i][1] = o.getNormalDate();
+            data[i][2] = o.getTemperature();
+            data[i][3] = o.getHumidity();
+            data[i][4] = o.getUvIndex();
+            data[i][5] = o.getWindSpeed();
+            i++;
         }
+
+        dataTable = new JTable(data, columns) {
+            public boolean isCellEditable(int row,int column){
+                return false;
+            }
+        };
+        scrollPane.setViewportView(dataTable);
+        dataTable.setFillsViewportHeight(true);
     }
 
     private class animatedJPanel extends JPanel implements ActionListener, Runnable {
