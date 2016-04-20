@@ -16,6 +16,75 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+class Node {
+
+    private ArrayList<WeatherObservation> obs = new ArrayList<>();
+    private Node parent;
+    private final Date date;
+    private Node leftChild = null;
+    private Node rightChild = null;
+
+    public Node(WeatherObservation o) {
+        obs.add(o);
+        this.date = o.getDate();
+    }
+
+    public void setParent(Node n) {
+        this.parent = n;
+    }
+
+    public void insert(WeatherObservation o) {
+        if (o.getDate().compareTo(date) == 0) {
+            obs.add(o);
+        } else if (o.getDate().compareTo(date) < 0) {
+            if (rightChild == null) {
+                rightChild = new Node(o);
+            } else {
+                rightChild.insert(o);
+            }
+        } else {
+            if (leftChild == null) {
+                leftChild = new Node(o);
+            } else {
+                leftChild.insert(o);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        // TODO
+        return "";
+    }
+
+    public ArrayList<WeatherObservation> search(Date d) {
+        if (d == date) {
+            return obs;
+        } else if (d.compareTo(date) > 0 && rightChild != null) {
+            return rightChild.search(d);
+        } else if (d.compareTo(date) < 0 && leftChild != null) {
+            return leftChild.search(d);
+        } else {
+            return new ArrayList<WeatherObservation>();
+        }
+    }
+
+    public ArrayList<WeatherObservation> traverse() {
+        ArrayList<WeatherObservation> a = new ArrayList<>();
+
+        if (leftChild != null) {
+            a.addAll(leftChild.traverse());
+        }
+        a.addAll(obs);
+        if (rightChild != null) {
+            a.addAll(rightChild.traverse());
+        }
+        return a;
+    }
+}
+
+
+
 public class WeatherHistory implements Serializable, Database {
     ArrayList<WeatherObservation> history = new ArrayList<>();
     private static Logger logger = Logger.getLogger(WeatherHistory.class.getName());
