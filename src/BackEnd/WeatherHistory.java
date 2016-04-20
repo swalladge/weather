@@ -73,7 +73,7 @@ public class WeatherHistory implements Serializable, Database {
     @Override
     public Collection<WeatherObservation> checkWeatherByDate(String date) {
         // TODO: convert date to date object, search this.history for matches, return collection of weatherobservations
-        return null;
+        return this.getHistory();
     }
 
 

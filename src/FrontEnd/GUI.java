@@ -23,12 +23,13 @@ public class GUI implements ActionListener {
     JButton loadButton = new JButton("Load");
     JButton displayButton = new JButton("Display");
     JButton searchButton = new JButton("Search");
-    JButton animateButton = new JButton("Animate!");
+    JButton animateButton = new JButton("Toggle animation");
     JScrollPane scrollPane = new JScrollPane();
     JTable dataTable;
     JEditorPane displayText;
     JTextField searchText = new JTextField();
     Database db = null;
+    Thread painting;
 
     public GUI() {
         // add event listener to buttons
@@ -42,8 +43,19 @@ public class GUI implements ActionListener {
         displayText.setContentType("text/html");
         displayText.setText("<h2>Welcome to the weather observation viewer!</h2><h3>Press <i>load</i> to load the weather data, then <i>display</i> to view it!</h3>");
         displayText.setEditable(false);
-        scrollPane.setViewportView(displayText);
-        
+
+        String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
+        Object[][] data = new Object[2][6];
+        dataTable = new JTable(data, columns) {
+            // disable editing cells (can't change the weather from the past! :P)
+            // source: http://www.codeproject.com/Questions/557307/DisableplusEditingplusonplusJTablepluscellplusinpl
+            public boolean isCellEditable(int row,int column){
+                return false;
+            }
+        };
+        scrollPane.setViewportView(dataTable);
+        dataTable.setFillsViewportHeight(true);
+
         // search panel consisting of a text box and button
         searchPanel.setAlignmentX(1);
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
@@ -67,9 +79,11 @@ public class GUI implements ActionListener {
         // add all the components
         content.add(scrollPane);
         content.add(searchPanel);
+        content.add(displayText);
         content.add(drawPanel);
         content.add(loadButton);
         content.add(displayButton);
+        content.add(animateButton);
 
         // line up everything with spring layout
         layout.putConstraint(SpringLayout.WEST, scrollPane, 10, SpringLayout.WEST, frame);
@@ -79,8 +93,15 @@ public class GUI implements ActionListener {
         layout.putConstraint(SpringLayout.WEST, drawPanel, 10, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.NORTH, loadButton, 10, SpringLayout.SOUTH, drawPanel);
         layout.putConstraint(SpringLayout.WEST, loadButton, 10, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.WEST, displayButton, 10, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.NORTH, displayButton, 10, SpringLayout.SOUTH, loadButton);
+        layout.putConstraint(SpringLayout.WEST, displayButton, 10, SpringLayout.EAST, loadButton);
+        layout.putConstraint(SpringLayout.NORTH, displayButton, 0, SpringLayout.NORTH, loadButton);
+
+        layout.putConstraint(SpringLayout.WEST, displayText, 10, SpringLayout.EAST, scrollPane);
+        layout.putConstraint(SpringLayout.NORTH, displayText, 10, SpringLayout.NORTH, frame);
+        layout.putConstraint(SpringLayout.NORTH, drawPanel, 10, SpringLayout.SOUTH, displayText);
+
+        layout.putConstraint(SpringLayout.NORTH, animateButton, 0, SpringLayout.NORTH, displayButton);
+        layout.putConstraint(SpringLayout.WEST, animateButton, 10, SpringLayout.EAST, displayButton);
 
         // frame
         frame.pack();
@@ -88,9 +109,9 @@ public class GUI implements ActionListener {
         frame.setSize(1200, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Thread painting = new Thread(drawPanel);
+        painting = new Thread(drawPanel);
         painting.start();
-        //new javax.swing.Timer(40, drawPanel).start();
+        //new javax.swing.Timer(40, drawPanel).start(); // timers too jumpy and unreliable for smooth animations
     }
 
     public void setDB(Database db) {
@@ -108,12 +129,29 @@ public class GUI implements ActionListener {
             db.loadObservationsFromHTMLFile();
             this.loadButton.setText("Loaded");
         } else if (actionEvent.getActionCommand() == "Display") {
-            displayTable();
+            displayTable(db.getObservations());
+        } else if (actionEvent.getActionCommand() == "Search") {
+            performSearch(searchText.getText());
+        } else if (actionEvent.getActionCommand() == "Toggle animation") {
+            drawPanel.suspended = !drawPanel.suspended;
         }
     }
 
-    private void displayTable() {
-        Collection<WeatherObservation> observations = db.getObservations();
+    private void performSearch(String text) {
+        Collection<WeatherObservation> observations;
+
+        // TODO: process and format date text
+
+        observations = db.checkWeatherByDate(text);
+
+        // TODO: if no observations display message?
+
+        displayTable(observations);
+
+    }
+
+
+    private void displayTable(Collection<WeatherObservation> observations) {
         List<WeatherObservation> obs = new ArrayList<>(observations);
         if (observations.isEmpty()) {
             JOptionPane.showMessageDialog (null, "No weather observations have been loaded! Try clicking 'Load' to load from the html file first.", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -138,16 +176,11 @@ public class GUI implements ActionListener {
             }
 
             dataTable = new JTable(data, columns) {
-                // disable editing cells (can't change the weather from the past! :P)
-                // source: http://www.codeproject.com/Questions/557307/DisableplusEditingplusonplusJTablepluscellplusinpl
                 public boolean isCellEditable(int row,int column){
                     return false;
                 }
             };
 
-            scrollPane.setViewportView(dataTable);
-
-            dataTable.setFillsViewportHeight(true);
         }
     }
 
@@ -181,12 +214,23 @@ public class GUI implements ActionListener {
 
         }
 
+        public volatile boolean suspended;
+
         @Override
         public void run() {
+            suspended = false;
             while (true) {
                 repaint();
                 try {
                     Thread.sleep(5);
+                    if (suspended) {
+                        long one = (new Date()).getTime();
+                        while (suspended) {
+                            Thread.sleep(1);
+                        }
+                        long two = (new Date()).getTime();
+                        startTime += (two - one); // offset startTime to avoid time jump in animation
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
