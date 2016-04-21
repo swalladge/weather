@@ -206,7 +206,7 @@ public class GUI implements ActionListener, KeyListener {
     @Override
     public void keyReleased(KeyEvent keyEvent) {
         int c = keyEvent.getKeyCode();
-        if (c == 10) {
+        if (c == KeyEvent.VK_ENTER) {
             performSearch(searchText.getText());
         }
     }
