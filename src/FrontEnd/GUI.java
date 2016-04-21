@@ -4,7 +4,6 @@ import BackEnd.Database;
 import BackEnd.WeatherObservation;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +11,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -75,7 +73,6 @@ public class GUI implements ActionListener, KeyListener {
         // setup the drawing panel
         Dimension d = new Dimension(500, 500);
         drawPanel.setPreferredSize(d);
-        // TODO: init class for drawing here now
 
         // we have a layout now
         SpringLayout layout = new SpringLayout();
@@ -211,37 +208,29 @@ public class GUI implements ActionListener, KeyListener {
         }
     }
 
-    private class animatedJPanel extends JPanel implements ActionListener, Runnable {
-        final int rightBound = 500;
-        final int lowerBound = 500;
+    private class animatedJPanel extends JPanel implements Runnable {
         long offset = 0;
         long startTime = (new Date()).getTime();
+        public volatile boolean suspended;
+        Animations animations = new Animations();
+
+        // setting the preferred size will set the bounds for the animation as well
+        @Override
+        public void setPreferredSize(Dimension d) {
+            super.setPreferredSize(d);
+            animations.setBounds((int) d.getWidth(),(int) d.getHeight());
+        }
 
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            // TODO: split drawing out into a separate class - and add methods to that for rain, sunshine, etc.
             Graphics2D pen = (Graphics2D) g;
-
-            pen.setColor(Color.blue);
-
             offset = ((new Date()).getTime() - startTime);
-            pen.fillOval(30,(int) (30+offset/30)%lowerBound, 10, 20);
-            pen.fillOval(90,(int) (20+offset/40)%lowerBound, 10, 20);
-            pen.fillOval(200,(int) (20+offset/10)%lowerBound, 10, 20);
-            pen.fillOval(230,(int) (50+offset/80)%lowerBound, 15, 30);
-
+            animations.setOffset(offset);
+            // TODO: logic to pick an animation here (based on selected weather event or something)?
+            animations.rain(pen);
         }
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            // update animation here
-            repaint();
-
-        }
-
-        public volatile boolean suspended;
 
         @Override
         public void run() {
@@ -249,11 +238,11 @@ public class GUI implements ActionListener, KeyListener {
             while (true) {
                 repaint();
                 try {
-                    Thread.sleep(5);
+                    Thread.sleep(10);
                     if (suspended) {
                         long one = (new Date()).getTime();
                         while (suspended) {
-                            Thread.sleep(1);
+                            Thread.sleep(50);
                         }
                         long two = (new Date()).getTime();
                         startTime += (two - one); // offset startTime to avoid time jump in animation
@@ -266,3 +255,34 @@ public class GUI implements ActionListener, KeyListener {
     }
 
 }
+
+// class to manage a range of graphics given bounds and a pen (as well as a time offset for animation support)
+class Animations {
+    int width = 0;
+    int height = 0;
+    long offset = 0;
+
+    Animations() {
+
+    }
+
+    public void setBounds(int w, int h) {
+        width = w;
+        height = h;
+    }
+
+    public void rain(Graphics2D pen) {
+
+        pen.setColor(Color.blue);
+        pen.fillOval(30,(int) (30+offset/30)%height, 10, 20);
+        pen.fillOval(90,(int) (20+offset/40)%height, 10, 20);
+        pen.fillOval(200,(int) (20+offset/10)%height, 10, 20);
+        pen.fillOval(230,(int) (50+offset/80)%height, 15, 30);
+
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+}
+
