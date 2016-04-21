@@ -8,15 +8,20 @@ import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
  * The user interface class - this sets up the gui, connects to the database, adds the listeners, etc.
  */
-public class GUI implements ActionListener {
+public class GUI implements ActionListener, KeyListener {
 
+    private static Logger logger = Logger.getLogger(GUI.class.getName());
     JFrame frame = new JFrame();
     animatedJPanel drawPanel = new animatedJPanel();
     JPanel searchPanel = new JPanel();
@@ -61,7 +66,7 @@ public class GUI implements ActionListener {
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
 
         searchText.setColumns(30);
-        // TODO: allow pressing enter in searchText to search
+        searchText.addKeyListener(this);
 
         searchPanel.add(searchText);
         searchPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -125,7 +130,6 @@ public class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        // TODO: add actions for search and animate toggle buttons
         if (actionEvent.getActionCommand() == "Load") {
             db.loadObservationsFromHTMLFile();
             this.loadButton.setText("Loaded");
@@ -187,6 +191,24 @@ public class GUI implements ActionListener {
         };
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent keyEvent) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent keyEvent) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent keyEvent) {
+        int c = keyEvent.getKeyCode();
+        if (c == 10) {
+            performSearch(searchText.getText());
+        }
     }
 
     private class animatedJPanel extends JPanel implements ActionListener, Runnable {
