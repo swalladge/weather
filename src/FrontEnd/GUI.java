@@ -61,6 +61,7 @@ public class GUI implements ActionListener {
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
 
         searchText.setColumns(30);
+        // TODO: allow pressing enter in searchText to search
 
         searchPanel.add(searchText);
         searchPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -142,7 +143,7 @@ public class GUI implements ActionListener {
 
         observations = db.checkWeatherByDate(text);
         if (observations == null) {
-            // TODO: something
+            // TODO: something - display message maybe
         } else {
             displayTable(observations);
         }

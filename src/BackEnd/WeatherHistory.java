@@ -6,6 +6,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -118,11 +121,81 @@ public class WeatherHistory implements Serializable, Database {
     @Override
     public void loadObservationsFromHTMLFile() {
 
-        String filename = "observations.html";
-        File theFile = new File(filename);
+        String htmlData = "";
+
+        // for loading from local file
+        /*
+        FileReader fr = null;
+        BufferedReader bfr = null;
+        try {
+            String filename = "observations.html";
+            fr = new FileReader(new File(filename));
+            bfr = new BufferedReader(fr);
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                htmlData += line;
+            }
+        } catch (FileNotFoundException e) {
+            logger.log(Level.SEVERE, "FileNotFoundException [{0}]", e.getMessage());
+            return;
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            return;
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+            try {
+                if (bfr != null) {
+                    bfr.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+        }
+        */
+
+
+        // load from the given url
+        InputStreamReader isr = null;
+        BufferedReader r = null;
+        try {
+            String urlString = "http://rengland.spinetail.cdu.edu.au/observations/";
+            URL url = new URL(urlString);
+            URLConnection connect = url.openConnection();
+            isr = new InputStreamReader(connect.getInputStream());
+            r = new BufferedReader(isr);
+            String line;
+            while ((line = r.readLine()) != null) {
+                htmlData += line;
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            return;
+        } finally {
+            try {
+                if (isr != null) {
+                    isr.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+            try {
+                if (r != null) {
+                    r.close();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
+            }
+        }
+
 
         try {
-            Document document = Jsoup.parse(theFile, "UTF-8", "");
+            Document document = Jsoup.parse(htmlData);
             Elements entries = document.getElementsByTag("tr");
             boolean firstEntry = true;
             for (Element entry : entries) {
@@ -143,13 +216,6 @@ public class WeatherHistory implements Serializable, Database {
                 this.addObservation(obs);
 
             }
-
-
-
-        } catch (FileNotFoundException e) {
-            logger.log(Level.SEVERE, "File Not Found [{0}]", e.getMessage());
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
         } catch (ParseException e) {
             logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
         }
