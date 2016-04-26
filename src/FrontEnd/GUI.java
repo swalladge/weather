@@ -63,7 +63,7 @@ public class GUI implements ActionListener, KeyListener {
         dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
-        scrollPane.setPreferredSize(new Dimension(550, 400));
+        scrollPane.setPreferredSize(new Dimension(550, 500));
 
 
         //searchText.setColumns(30);
@@ -124,9 +124,11 @@ public class GUI implements ActionListener, KeyListener {
         // frame
         frame.pack();
         frame.setTitle("Weather Observations");
-        frame.setSize(new Dimension(1024, 768));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        frame.setSize(new Dimension(1024, 768));
         frame.setMinimumSize(new Dimension(1024, 768));
+        frame.setResizable(false);
 
         painting = new Thread(drawPanel);
         painting.start();
