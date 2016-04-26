@@ -22,7 +22,6 @@ public class GUI implements ActionListener, KeyListener {
     private static Logger logger = Logger.getLogger(GUI.class.getName());
     JFrame frame = new JFrame();
     animatedJPanel drawPanel = new animatedJPanel();
-    JPanel searchPanel = new JPanel();
     JButton loadButton = new JButton("Load");
     JButton displayButton = new JButton("Display");
     JButton searchButton = new JButton("Search");
@@ -44,8 +43,13 @@ public class GUI implements ActionListener, KeyListener {
         // main display output and weather table
         displayText = new JEditorPane();
         displayText.setContentType("text/html");
-        displayText.setText("<h2>Welcome to the weather observation viewer!</h2><h3>Press <i>load</i> to load the weather data, then <i>display</i> to view it!</h3>");
+        displayText.setText("<h2>Welcome to the weather observation viewer!</h2>" +
+                "<h3>Press [load] to load the weather data, then [display] to view it!</h3>" +
+                "<p>You can also search for a particular date.</p>");
         displayText.setEditable(false);
+        //displayText.setPreferredSize(new Dimension(430, 500));
+        displayText.setBackground(new Color(0xFAEFAD));
+        displayText.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
         Object[][] data = new Object[2][6];
@@ -56,23 +60,17 @@ public class GUI implements ActionListener, KeyListener {
                 return false;
             }
         };
+        dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
+        scrollPane.setPreferredSize(new Dimension(550, 400));
 
-        // search panel consisting of a text box and button
-        searchPanel.setAlignmentX(1);
-        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
 
-        searchText.setColumns(30);
+        //searchText.setColumns(30);
         searchText.addKeyListener(this);
 
-        searchPanel.add(searchText);
-        searchPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        searchPanel.add(searchButton);
-
         // setup the drawing panel
-        Dimension d = new Dimension(500, 500);
-        drawPanel.setPreferredSize(d);
+        drawPanel.setPreferredSize(new Dimension(990, 200));
 
         // we have a layout now
         SpringLayout layout = new SpringLayout();
@@ -80,37 +78,55 @@ public class GUI implements ActionListener, KeyListener {
         content.setLayout(layout);
 
         // add all the components
-        content.add(scrollPane);
-        content.add(searchPanel);
-        content.add(displayText);
         content.add(drawPanel);
+        content.add(scrollPane);
+        content.add(displayText);
         content.add(loadButton);
         content.add(displayButton);
         content.add(animateButton);
+        content.add(searchText);
+        content.add(searchButton);
 
         // line up everything with spring layout
+        // put in everything anticlockwise to ensure buttons and searchbox is not distorted,
+        //   and let displaytext fill remaining space
+
+        // draw panel top left
+        layout.putConstraint(SpringLayout.WEST, drawPanel, 10, SpringLayout.WEST, frame);
+        layout.putConstraint(SpringLayout.NORTH, drawPanel, 10, SpringLayout.NORTH, frame);
+
         layout.putConstraint(SpringLayout.WEST, scrollPane, 10, SpringLayout.WEST, frame);
-        layout.putConstraint(SpringLayout.NORTH, scrollPane, 10, SpringLayout.NORTH, frame);
-        layout.putConstraint(SpringLayout.NORTH, searchPanel, 10, SpringLayout.SOUTH, scrollPane);
-        layout.putConstraint(SpringLayout.EAST, searchPanel, 0, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.WEST, drawPanel, 10, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.NORTH, loadButton, 10, SpringLayout.SOUTH, drawPanel);
+        layout.putConstraint(SpringLayout.NORTH, scrollPane, 10, SpringLayout.SOUTH, drawPanel);
+
+        layout.putConstraint(SpringLayout.WEST, displayText, 10, SpringLayout.EAST, scrollPane);
+        layout.putConstraint(SpringLayout.NORTH, displayText, 10, SpringLayout.SOUTH, drawPanel);
+        layout.putConstraint(SpringLayout.EAST, displayText, 0, SpringLayout.EAST, drawPanel);
+
+        layout.putConstraint(SpringLayout.SOUTH, displayText, -10, SpringLayout.NORTH, loadButton);
+
+        layout.putConstraint(SpringLayout.SOUTH, searchButton, 0, SpringLayout.SOUTH, scrollPane);
+        layout.putConstraint(SpringLayout.EAST, searchButton, 0, SpringLayout.EAST, displayText);
+
+        layout.putConstraint(SpringLayout.SOUTH, loadButton, -10, SpringLayout.NORTH, searchButton);
+
         layout.putConstraint(SpringLayout.WEST, loadButton, 10, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.WEST, displayButton, 10, SpringLayout.EAST, loadButton);
         layout.putConstraint(SpringLayout.NORTH, displayButton, 0, SpringLayout.NORTH, loadButton);
-
-        layout.putConstraint(SpringLayout.WEST, displayText, 10, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.NORTH, displayText, 10, SpringLayout.NORTH, frame);
-        layout.putConstraint(SpringLayout.NORTH, drawPanel, 10, SpringLayout.SOUTH, displayText);
-
         layout.putConstraint(SpringLayout.NORTH, animateButton, 0, SpringLayout.NORTH, displayButton);
-        layout.putConstraint(SpringLayout.WEST, animateButton, 10, SpringLayout.EAST, displayButton);
+        layout.putConstraint(SpringLayout.EAST, animateButton, 0, SpringLayout.EAST, displayText);
+
+        layout.putConstraint(SpringLayout.NORTH, searchText, 0, SpringLayout.NORTH, searchButton);
+        layout.putConstraint(SpringLayout.WEST, searchText, 0, SpringLayout.WEST, displayText);
+        layout.putConstraint(SpringLayout.EAST, searchText, -10, SpringLayout.WEST, searchButton);
+        layout.putConstraint(SpringLayout.SOUTH, searchText, 0, SpringLayout.SOUTH, searchButton);
+
 
         // frame
         frame.pack();
         frame.setTitle("Weather Observations");
-        frame.setSize(1200, 800);
+        frame.setSize(new Dimension(1024, 768));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setMinimumSize(new Dimension(1024, 768));
 
         painting = new Thread(drawPanel);
         painting.start();
@@ -273,7 +289,10 @@ class Animations {
 
     public void rain(Graphics2D pen) {
 
-        pen.setColor(Color.blue);
+        pen.setColor(new Color(188, 204, 232));
+        pen.fillRect(0,0,width,height);
+
+        pen.setColor(new Color(55, 115, 193));
         pen.fillOval(30,(int) (30+offset/30)%height, 10, 20);
         pen.fillOval(90,(int) (20+offset/40)%height, 10, 20);
         pen.fillOval(200,(int) (20+offset/10)%height, 10, 20);
