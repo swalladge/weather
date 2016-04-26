@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// implementation of binary search tree data structure
+// TODO: implement tree balancing
 class Node {
 
     private ArrayList<WeatherObservation> obs = new ArrayList<>();

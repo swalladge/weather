@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.Clock;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -70,7 +71,7 @@ public class GUI implements ActionListener, KeyListener {
         searchText.addKeyListener(this);
 
         // setup the drawing panel
-        drawPanel.setPreferredSize(new Dimension(990, 200));
+        drawPanel.setPreferredSize(new Dimension(1000, 200));
 
         // we have a layout now
         SpringLayout layout = new SpringLayout();
@@ -236,7 +237,7 @@ public class GUI implements ActionListener, KeyListener {
         @Override
         public void setPreferredSize(Dimension d) {
             super.setPreferredSize(d);
-            animations.setBounds((int) d.getWidth(),(int) d.getHeight());
+            animations.init((int) d.getWidth(),(int) d.getHeight());
         }
 
         @Override
@@ -279,27 +280,62 @@ class Animations {
     int width = 0;
     int height = 0;
     long offset = 0;
+    int NDROPS = 200;
+    int[][] raindrops = new int[NDROPS][4]; // [x, relative y-offset, speed, size]
 
     Animations() {
 
     }
 
-    public void setBounds(int w, int h) {
+    public void init(int w, int h) {
         width = w;
         height = h;
+        
+        Random r = new Random((int) (new Date()).getTime());
+        for (int i=0; i<NDROPS; i++) {
+            raindrops[i][3] = r.nextInt(13) + 3; // size
+            raindrops[i][0] = r.nextInt(width-raindrops[i][3]); // x-coord (base right bound on previous size)
+            raindrops[i][1] = r.nextInt(height); // y-offset
+            raindrops[i][2] = r.nextInt(35) + (31 - raindrops[i][3]*2); // speed (lower = faster)
+        }
+        Arrays.sort(raindrops, new Comparator<int[]>() {
+            @Override public int compare(final int[] one, final int[] two) {
+                if (one[3] > two[3]) {
+                    return 1;
+                } else if (one[3] < two[3]) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
     }
 
     public void rain(Graphics2D pen) {
 
+        // sky background
         pen.setColor(new Color(188, 204, 232));
         pen.fillRect(0,0,width,height);
 
+        // draw half the raindrops
+        int half = NDROPS/2;
         pen.setColor(new Color(55, 115, 193));
-        pen.fillOval(30,(int) (30+offset/30)%height, 10, 20);
-        pen.fillOval(90,(int) (20+offset/40)%height, 10, 20);
-        pen.fillOval(200,(int) (20+offset/10)%height, 10, 20);
-        pen.fillOval(230,(int) (50+offset/80)%height, 15, 30);
+        for (int i=0; i<half; i++) {
+            pen.fillOval(raindrops[i][0], (int) (raindrops[i][1]+offset/raindrops[i][2])%height,
+                    raindrops[i][3], raindrops[i][3]*2);
+        }
 
+        // draw the clouds
+        pen.setColor(new Color(71, 90, 116));
+        for (int i=-10; i<width; i+=50) {
+            pen.fillOval(i, -10, 70, 30);
+        }
+
+        // draw rest of raindrops
+        pen.setColor(new Color(55, 115, 193));
+        for (int i=half; i<NDROPS; i++) {
+            pen.fillOval(raindrops[i][0], (int) (raindrops[i][1]+offset/raindrops[i][2])%height,
+                    raindrops[i][3], raindrops[i][3]*2);
+        }
     }
 
     public void setOffset(long offset) {
