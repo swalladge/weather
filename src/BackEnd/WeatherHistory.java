@@ -7,7 +7,6 @@ import org.jsoup.select.Elements;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,101 +18,140 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// implementation of binary search tree data structure
 // TODO: implement tree balancing
-class Node {
+class BST {
+    private Node root;
 
-    private ArrayList<WeatherObservation> obs = new ArrayList<>();
-    private Node parent;
-    private final Date date;
-    private Node leftChild = null;
-    private Node rightChild = null;
-
-    public Node(WeatherObservation o) {
-        obs.add(o);
-        this.date = o.getDate();
+    public BST() {
+        root = null;
     }
 
-    public void setParent(Node n) {
-        this.parent = n;
-    }
-
-    public void insert(WeatherObservation o) {
-        if (o.getDate().compareTo(date) == 0) {
-            obs.add(o);
-        } else if (o.getDate().compareTo(date) > 0) {
-            if (rightChild == null) {
-                rightChild = new Node(o);
-            } else {
-                rightChild.insert(o);
-            }
+    public void add(WeatherObservation o) {
+        if (root == null) {
+            root = new Node(o);
         } else {
-            if (leftChild == null) {
-                leftChild = new Node(o);
-            } else {
-                leftChild.insert(o);
-            }
+            root.insert(o);
         }
-    }
-
-    @Override
-    public String toString() {
-        String s = "";
-        if (leftChild != null) {
-            s += leftChild.toString();
-        }
-        for (WeatherObservation o: obs) {
-            s += o + "\n";
-        }
-        if (rightChild != null) {
-            s += rightChild.toString();
-        }
-
-        return s;
-
     }
 
     public Integer size() {
-        Integer sum = 1;
-        if (leftChild != null) {
-            sum += leftChild.size();
+        if (root == null) {
+            return 0;
+        } else {
+            return root.size();
         }
-        if (rightChild != null) {
-            sum += rightChild.size();
-        }
-        return sum;
     }
 
-    public ArrayList<WeatherObservation> search(Date d) {
-        if (d.compareTo(date) == 0) {
-            return obs;
-        } else if (d.compareTo(date) > 0 && rightChild != null) {
-            return rightChild.search(d);
-        } else if (d.compareTo(date) < 0 && leftChild != null) {
-            return leftChild.search(d);
+    public ArrayList<WeatherObservation> find(Date d) {
+        if (root == null) {
+            return new ArrayList<>();
         } else {
-            return new ArrayList<WeatherObservation>();
+            return root.find(d);
         }
     }
 
     public ArrayList<WeatherObservation> traverse() {
-        ArrayList<WeatherObservation> a = new ArrayList<>();
-
-        if (leftChild != null) {
-            a.addAll(leftChild.traverse());
+        if (root == null) {
+            return new ArrayList<>();
+        } else {
+            return root.traverse();
         }
-        a.addAll(obs);
-        if (rightChild != null) {
-            a.addAll(rightChild.traverse());
-        }
-        return a;
     }
+
+    private class Node {
+
+        private ArrayList<WeatherObservation> obs = new ArrayList<>();
+        private Node parent;
+        private final Date date;
+        private Node leftChild = null;
+        private Node rightChild = null;
+
+        public Node(WeatherObservation o) {
+            obs.add(o);
+            this.date = o.getDate();
+        }
+
+        public void insert(WeatherObservation o) {
+            if (o.getDate().compareTo(date) == 0) {
+                obs.add(o);
+            } else if (o.getDate().compareTo(date) > 0) {
+                if (rightChild == null) {
+                    rightChild = new Node(o);
+                } else {
+                    rightChild.insert(o);
+                }
+            } else {
+                if (leftChild == null) {
+                    leftChild = new Node(o);
+                } else {
+                    leftChild.insert(o);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            String s = "";
+            if (leftChild != null) {
+                s += leftChild.toString();
+            }
+            for (WeatherObservation o: obs) {
+                s += o + "\n";
+            }
+            if (rightChild != null) {
+                s += rightChild.toString();
+            }
+
+            return s;
+
+        }
+
+        public Integer size() {
+            Integer sum = 1;
+            if (leftChild != null) {
+                sum += leftChild.size();
+            }
+            if (rightChild != null) {
+                sum += rightChild.size();
+            }
+            return sum;
+        }
+
+        public ArrayList<WeatherObservation> find(Date d) {
+            if (d.compareTo(date) == 0) {
+                return obs;
+            } else if (d.compareTo(date) > 0 && rightChild != null) {
+                return rightChild.find(d);
+            } else if (d.compareTo(date) < 0 && leftChild != null) {
+                return leftChild.find(d);
+            } else {
+                return new ArrayList<WeatherObservation>();
+            }
+        }
+
+        public ArrayList<WeatherObservation> traverse() {
+            ArrayList<WeatherObservation> a = new ArrayList<>();
+
+            if (leftChild != null) {
+                a.addAll(leftChild.traverse());
+            }
+
+            a.addAll(obs);
+
+            if (rightChild != null) {
+                a.addAll(rightChild.traverse());
+            }
+
+            return a;
+        }
+    }
+
 }
 
 
 
 public class WeatherHistory implements Serializable, Database {
-    Node history = null;
+    BST history = new BST();
     private static Logger logger = Logger.getLogger(WeatherHistory.class.getName());
 
     public WeatherHistory() {
@@ -232,7 +270,7 @@ public class WeatherHistory implements Serializable, Database {
     public Collection<WeatherObservation> checkWeatherByDate(String date) {
 
         // make sure history is loaded
-        if (history == null) {
+        if (history.size() == 0) {
             return null;
         }
         Date d;
@@ -246,7 +284,7 @@ public class WeatherHistory implements Serializable, Database {
                 return null;
             }
         }
-        return history.search(d);
+        return history.find(d);
     }
 
 
@@ -260,18 +298,11 @@ public class WeatherHistory implements Serializable, Database {
 
 
     public Collection<WeatherObservation> getHistory() {
-        if (history == null) {
-            return new ArrayList<WeatherObservation>();
-        }
         return history.traverse();
     }
 
     public void addObservation(WeatherObservation w) {
-        if (history == null) {
-            history = new Node(w);
-        } else {
-            history.insert(w);
-        }
+        history.add(w);
     }
 
     public Integer getHistorySize() {
@@ -317,9 +348,9 @@ public class WeatherHistory implements Serializable, Database {
     public Boolean loadFromSerialized(String filename) {
         try {
             ObjectInputStream is = new ObjectInputStream(new FileInputStream(filename));
-            Node temp = null;
+            BST temp = null;
             try {
-                temp = (Node) is.readObject();
+                temp = (BST) is.readObject();
             } catch (ClassNotFoundException e) {
                 logger.log(Level.SEVERE, "ClassNotFoundException [{0}]", e.getMessage());
                 return false;
@@ -411,11 +442,9 @@ public class WeatherHistory implements Serializable, Database {
         if (data == null) {
             return false;
         }
+        history = new BST();
         for (WeatherObservation o: data) {
-            if (history == null) {
-                history = new Node(o);
-            }
-            history.insert(o);
+            history.add(o);
         }
         return true;
     }
@@ -431,10 +460,7 @@ public class WeatherHistory implements Serializable, Database {
             return false;
         }
         for (WeatherObservation o: data) {
-            if (history == null) {
-                history = new Node(o);
-            }
-            history.insert(o);
+            history.add(o);
         }
         return true;
     }
