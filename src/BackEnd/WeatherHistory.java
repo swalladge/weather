@@ -58,6 +58,16 @@ class BST {
         }
     }
 
+    @Override
+    public String toString() {
+        // TODO: make pretty
+        if (root == null) {
+            return "Empty BST!";
+        } else {
+            return root.toString();
+        }
+    }
+
     private class Node {
 
         private ArrayList<WeatherObservation> obs = new ArrayList<>();
