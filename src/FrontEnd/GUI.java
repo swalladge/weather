@@ -2,13 +2,11 @@ package FrontEnd;
 
 import BackEnd.Database;
 import BackEnd.WeatherObservation;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -17,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * The user interface class - this sets up the gui, connects to the database, adds the listeners, etc.
  */
-public class GUI implements ActionListener, KeyListener {
+public class GUI implements ActionListener, KeyListener, MouseListener {
 
     private static Logger logger = Logger.getLogger(GUI.class.getName());
     JFrame frame = new JFrame();
@@ -35,6 +33,8 @@ public class GUI implements ActionListener, KeyListener {
     String welcomeText = "<h2>Welcome to the weather observation viewer!</h2>" +
             "<h3>Press [load] to load the weather data, then [display] to view it!</h3>" +
             "<p>You can search for a particular date (like '25/12/2015') using the search box.</p>";
+    String errorMessage = "";
+    String weatherInfo = "";
 
     public GUI() {
         // add event listener to buttons
@@ -56,11 +56,11 @@ public class GUI implements ActionListener, KeyListener {
         // main display output and weather table
         displayText = new JEditorPane();
         displayText.setContentType("text/html");
-        displayText.setText(welcomeText);
         displayText.setEditable(false);
         //displayText.setPreferredSize(new Dimension(430, 500));
         displayText.setBackground(new Color(0xFAF2CD));
         displayText.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        redrawInfo();
 
         String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
         Object[][] data = new Object[2][6];
@@ -156,13 +156,14 @@ public class GUI implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        displayText.setText(welcomeText); // reset the info/welcome text
+        redrawInfo();
+        // loading is a once off thing in this app
         if (actionEvent.getActionCommand() == "Load") {
             db.loadObservationsFromHTMLFile();
             this.loadButton.setText("Loaded");
             welcomeText = welcomeText +
                     "<p style=\"color:green;\">Observations are loaded and ready for displaying or searching!</p>";
-            displayText.setText(welcomeText);
+            redrawInfo();
         } else if (actionEvent.getActionCommand() == "Display") {
             displayObservations();
         } else if (actionEvent.getActionCommand() == "Search") {
@@ -186,24 +187,32 @@ public class GUI implements ActionListener, KeyListener {
 
         // check if was invalid date format (would have returned null)
         if (observations == null) {
-            displayText.setText(welcomeText +
-                                "<p style=\"color:red;\"><b>Invalid date format!</b></p>" );
+            errorMessage = "<p style=\"color:red;\"><b>Invalid date format!</b></p>";
+            redrawInfo();
         } else {
             if (observations.size() == 0) {
-                displayText.setText(welcomeText +
-                        String.format("<p style=\"color:red;\"><b>No observations found for %s!</b></p>", text));
+                errorMessage = String.format("<p style=\"color:red;\"><b>No observations found for %s!</b></p>", text);
+                redrawInfo();
             }
             displayTable(observations);
         }
 
     }
 
+    private void redrawInfo() {
+        String spacer = "<hr />";
+        if (weatherInfo.length() == 0) {
+            spacer = "";
+        }
+        displayText.setText(welcomeText + "<hr />" + weatherInfo + spacer + errorMessage);
+    }
+
     private void displayObservations() {
         Collection<WeatherObservation> o = db.getObservations();
         if (o.isEmpty()) {
-            displayText.setText(welcomeText +
-            "<p style=\"color:red;\"><b>No weather observations have been loaded!" +
-                    " Try clicking 'Load' to load from the html file first.</b></p>");
+            errorMessage = "<p style=\"color:red;\"><b>No weather observations have been loaded!" +
+                    " Try clicking 'Load' to load from the html file first.</b></p>";
+            redrawInfo();
         } else {
             displayTable(o);
         }
@@ -235,6 +244,8 @@ public class GUI implements ActionListener, KeyListener {
                 return false;
             }
         };
+        dataTable.addMouseListener(this);
+        //dataTable.addKeyListener(this);
         dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
@@ -258,17 +269,75 @@ public class GUI implements ActionListener, KeyListener {
         }
     }
 
+    // currently only the jtable listens for mouse clicks
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+        // get selected weather data
+        dataTable.getSelectedRow();
+        String place = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        String date = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 1);
+        Double temp = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 2);
+        Double humid = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 3);
+        Double uv = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 4);
+        Double wind = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 5);
+
+        // choose the animation
+        // TODO: better criteria
+        if (humid > 50 && temp < 35) {
+            drawPanel.setAnimation("rain");
+        } else {
+            drawPanel.setAnimation("sunny");
+        }
+
+        // set the text to show current data
+        weatherInfo = String.format("<h3 style=\"color:blue;\">%s</h3>" +
+                "<p>on %s</p>" +
+                "<p>%s°C | RH %s%% | %s UV index | %skm/h wind</p>",
+                place, date, temp, humid, uv, wind);
+        redrawInfo();
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+
+    }
+
     private class animatedJPanel extends JPanel implements Runnable {
         long offset = 0;
         long startTime = (new Date()).getTime();
         public volatile boolean suspended;
         Animations animations = new Animations();
+        String animation = "sunny";
 
         // setting the preferred size will set the bounds for the animation as well
         @Override
         public void setPreferredSize(Dimension d) {
             super.setPreferredSize(d);
             animations.init((int) d.getWidth(),(int) d.getHeight());
+        }
+
+        public boolean setAnimation(String a) {
+            if (!animations.available(a)) {
+                return false;
+            } else {
+                animation = a;
+                return true;
+            }
         }
 
         @Override
@@ -278,9 +347,7 @@ public class GUI implements ActionListener, KeyListener {
             Graphics2D pen = (Graphics2D) g;
             offset = ((new Date()).getTime() - startTime);
             animations.setOffset(offset);
-            // TODO: logic to pick an animation here (based on selected weather event or something)?
-            animations.rain(pen);
-            //animations.sunny(pen);
+            animations.animate(animation, pen);
         }
 
         @Override
@@ -317,9 +384,12 @@ class Animations {
     int[][] raindrops = new int[NDROPS][4]; // [x, relative y-offset, speed, size]
     Image landscape;
     int[][] stars = new int[NSTARS][2];
+    ArrayList<String> availableAnimations = new ArrayList<>();
 
     Animations() {
         landscape = Toolkit.getDefaultToolkit().getImage("countryside.png");
+        availableAnimations.add("rain");
+        availableAnimations.add("sunny");
     }
 
     public void init(int w, int h) {
@@ -351,7 +421,7 @@ class Animations {
         });
     }
 
-    public void rain(Graphics2D pen) {
+    private void rain(Graphics2D pen) {
 
         // sky background
         pen.setColor(new Color(184, 195, 196));
@@ -382,7 +452,7 @@ class Animations {
         }
     }
 
-    public void sunny(Graphics2D pen) {
+    private void sunny(Graphics2D pen) {
 
         // sky background
         pen.setColor(new Color(167, 225, 246));
@@ -416,6 +486,21 @@ class Animations {
 
     public void setOffset(long offset) {
         this.offset = offset;
+    }
+
+    public boolean available(String a) {
+        if (availableAnimations.contains(a)) {
+            return true;
+        }
+        return false;
+    }
+
+    public void animate(String animation, Graphics2D pen) {
+        if (animation == "rain") {
+            rain(pen);
+        } else if (animation == "sunny") {
+            sunny(pen);
+        }
     }
 }
 
