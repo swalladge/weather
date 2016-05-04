@@ -7,7 +7,7 @@ import java.util.Collection;
  */
 public interface Database {
 
-    public void loadObservationsFromHTMLFile();
+    public boolean loadObservationsFromHTMLFile();
 
     public Collection<WeatherObservation> getObservations();
 

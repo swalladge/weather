@@ -156,14 +156,23 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+
+        // reset the error message and redraw
+        errorMessage = "";
         redrawInfo();
+
         // loading is a once off thing in this app
         if (actionEvent.getActionCommand() == "Load") {
-            db.loadObservationsFromHTMLFile();
+            if (!db.loadObservationsFromHTMLFile()) {
+                errorMessage = "<p style=\"color:red;\">Could not load from html file!</p>";
+                redrawInfo();
+                return;
+            }
             this.loadButton.setText("Loaded");
             welcomeText = welcomeText +
                     "<p style=\"color:green;\">Observations are loaded and ready for displaying or searching!</p>";
             redrawInfo();
+
         } else if (actionEvent.getActionCommand() == "Display") {
             displayObservations();
         } else if (actionEvent.getActionCommand() == "Search") {
@@ -192,6 +201,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         } else {
             if (observations.size() == 0) {
                 errorMessage = String.format("<p style=\"color:red;\"><b>No observations found for %s!</b></p>", text);
+                weatherInfo = "";
                 redrawInfo();
             }
             displayTable(observations);
@@ -249,6 +259,8 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
+        printWeatherData();
+
     }
 
     @Override
@@ -269,17 +281,25 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         }
     }
 
-    // currently only the jtable listens for mouse clicks
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent) {
+    private void printWeatherData() {
+
+        if (dataTable.getModel().getRowCount() < 1) {
+            return;
+        }
+
         // get selected weather data
-        dataTable.getSelectedRow();
-        String place = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
-        String date = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 1);
-        Double temp = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 2);
-        Double humid = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 3);
-        Double uv = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 4);
-        Double wind = (Double) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 5);
+        Integer row = dataTable.getSelectedRow();
+        // use first element if none selected
+        if (row < 0) {
+            row = 0;
+        }
+
+        String place = (String) dataTable.getModel().getValueAt(row, 0);
+        String date = (String) dataTable.getModel().getValueAt(row, 1);
+        Double temp = (Double) dataTable.getModel().getValueAt(row, 2);
+        Double humid = (Double) dataTable.getModel().getValueAt(row, 3);
+        Double uv = (Double) dataTable.getModel().getValueAt(row, 4);
+        Double wind = (Double) dataTable.getModel().getValueAt(row, 5);
 
         // choose the animation
         // TODO: better criteria
@@ -291,11 +311,16 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
         // set the text to show current data
         weatherInfo = String.format("<h3 style=\"color:blue;\">%s</h3>" +
-                "<p>on %s</p>" +
-                "<p>%s°C | RH %s%% | %s UV index | %skm/h wind</p>",
+                        "<p>on %s</p>" +
+                        "<p>%s°C | RH %s%% | %s UV index | %skm/h wind</p>",
                 place, date, temp, humid, uv, wind);
         redrawInfo();
+    }
 
+    // currently only the jtable listens for mouse clicks
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+        printWeatherData();
     }
 
     @Override

@@ -159,7 +159,7 @@ public class WeatherHistory implements Serializable, Database {
     }
 
     @Override
-    public void loadObservationsFromHTMLFile() {
+    public boolean loadObservationsFromHTMLFile() {
 
         String htmlData = "";
 
@@ -204,6 +204,7 @@ public class WeatherHistory implements Serializable, Database {
         InputStreamReader isr = null;
         BufferedReader r = null;
         try {
+            // TODO: [ENHANCEMENT] allow loading from other html files
             String urlString = "http://rengland.spinetail.cdu.edu.au/observations/";
             URL url = new URL(urlString);
             URLConnection connect = url.openConnection();
@@ -215,7 +216,7 @@ public class WeatherHistory implements Serializable, Database {
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
-            return;
+            return false;
         } finally {
             try {
                 if (isr != null) {
@@ -254,11 +255,12 @@ public class WeatherHistory implements Serializable, Database {
 
                 WeatherObservation obs = new WeatherObservation(place, date, temperature, humidity, uvIndex, windSpeed);
                 this.addObservation(obs);
-
             }
         } catch (ParseException e) {
             logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
+            return false;
         }
+        return true;
     }
 
     @Override
