@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Clock;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,30 +25,41 @@ public class GUI implements ActionListener, KeyListener {
     JButton loadButton = new JButton("Load");
     JButton displayButton = new JButton("Display");
     JButton searchButton = new JButton("Search");
-    JButton animateButton = new JButton("Toggle animation");
+    JButton animateButton = new JButton("Pause Animation");
     JScrollPane scrollPane = new JScrollPane();
     JTable dataTable;
     JEditorPane displayText;
     JTextField searchText = new JTextField();
     Database db = null;
     Thread painting;
+    String welcomeText = "<h2>Welcome to the weather observation viewer!</h2>" +
+            "<h3>Press [load] to load the weather data, then [display] to view it!</h3>" +
+            "<p>You can search for a particular date (like '25/12/2015') using the search box.</p>";
 
     public GUI() {
         // add event listener to buttons
         loadButton.addActionListener(this);
         displayButton.addActionListener(this);
-        animateButton.addActionListener(this);
+        animateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (drawPanel.suspended) {
+                    animateButton.setText("Pause Animation");
+                } else {
+                    animateButton.setText("Play Animation");
+                }
+                drawPanel.suspended = !drawPanel.suspended;
+            }
+        });
         searchButton.addActionListener(this);
 
         // main display output and weather table
         displayText = new JEditorPane();
         displayText.setContentType("text/html");
-        displayText.setText("<h2>Welcome to the weather observation viewer!</h2>" +
-                "<h3>Press [load] to load the weather data, then [display] to view it!</h3>" +
-                "<p>You can also search for a particular date.</p>");
+        displayText.setText(welcomeText);
         displayText.setEditable(false);
         //displayText.setPreferredSize(new Dimension(430, 500));
-        displayText.setBackground(new Color(0xFAEFAD));
+        displayText.setBackground(new Color(0xFAF2CD));
         displayText.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         String[] columns = {"Place", "Date", "Temperature", "Humidity", "UV Index", "Wind Speed"};
@@ -146,25 +156,43 @@ public class GUI implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        displayText.setText(welcomeText); // reset the info/welcome text
         if (actionEvent.getActionCommand() == "Load") {
             db.loadObservationsFromHTMLFile();
             this.loadButton.setText("Loaded");
+            welcomeText = welcomeText +
+                    "<p style=\"color:green;\">Observations are loaded and ready for displaying or searching!</p>";
+            displayText.setText(welcomeText);
         } else if (actionEvent.getActionCommand() == "Display") {
             displayObservations();
         } else if (actionEvent.getActionCommand() == "Search") {
             performSearch(searchText.getText());
-        } else if (actionEvent.getActionCommand() == "Toggle animation") {
-            drawPanel.suspended = !drawPanel.suspended;
         }
     }
 
     private void performSearch(String text) {
         Collection<WeatherObservation> observations;
 
+        text = text.trim(); // trim trailing whitespace
+
+        // show all if searched for nothing
+        if (text.length() == 0) {
+            displayObservations();
+            return;
+        }
+
+        // search!
         observations = db.checkWeatherByDate(text);
+
+        // check if was invalid date format (would have returned null)
         if (observations == null) {
-            // TODO: something - display message maybe
+            displayText.setText(welcomeText +
+                                "<p style=\"color:red;\"><b>Invalid date format!</b></p>" );
         } else {
+            if (observations.size() == 0) {
+                displayText.setText(welcomeText +
+                        String.format("<p style=\"color:red;\"><b>No observations found for %s!</b></p>", text));
+            }
             displayTable(observations);
         }
 
@@ -173,7 +201,9 @@ public class GUI implements ActionListener, KeyListener {
     private void displayObservations() {
         Collection<WeatherObservation> o = db.getObservations();
         if (o.isEmpty()) {
-            JOptionPane.showMessageDialog (null, "No weather observations have been loaded! Try clicking 'Load' to load from the html file first.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            displayText.setText(welcomeText +
+            "<p style=\"color:red;\"><b>No weather observations have been loaded!" +
+                    " Try clicking 'Load' to load from the html file first.</b></p>");
         } else {
             displayTable(o);
         }
@@ -205,6 +235,7 @@ public class GUI implements ActionListener, KeyListener {
                 return false;
             }
         };
+        dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
     }

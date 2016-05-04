@@ -125,7 +125,7 @@ class BST {
             } else if (d.compareTo(date) < 0 && leftChild != null) {
                 return leftChild.find(d);
             } else {
-                return new ArrayList<WeatherObservation>();
+                return new ArrayList<>();
             }
         }
 
@@ -270,9 +270,9 @@ public class WeatherHistory implements Serializable, Database {
     public Collection<WeatherObservation> checkWeatherByDate(String date) {
 
         // make sure history is loaded
-        if (history.size() == 0) {
-            return null;
-        }
+        // if (history.size() == 0) {
+        //     return null;
+        // }
         Date d;
         try {
             d = new SimpleDateFormat("dd/mm/yyyy").parse(date);
@@ -280,7 +280,7 @@ public class WeatherHistory implements Serializable, Database {
             try {
                 d = new SimpleDateFormat("yyyy-mm-dd").parse(date);
             } catch (ParseException e2) {
-                logger.log(Level.WARNING, "unrecognized date format - returning null");
+                logger.log(Level.INFO, "unrecognized date format");
                 return null;
             }
         }
