@@ -280,6 +280,7 @@ public class GUI implements ActionListener, KeyListener {
             animations.setOffset(offset);
             // TODO: logic to pick an animation here (based on selected weather event or something)?
             animations.rain(pen);
+            //animations.sunny(pen);
         }
 
         @Override
@@ -310,12 +311,15 @@ public class GUI implements ActionListener, KeyListener {
 class Animations {
     int width = 0;
     int height = 0;
-    long offset = 0;
+    long offset = 0; // time offset - auto updated - use for animations
     int NDROPS = 200;
+    int NSTARS = 42;
     int[][] raindrops = new int[NDROPS][4]; // [x, relative y-offset, speed, size]
+    Image landscape;
+    int[][] stars = new int[NSTARS][2];
 
     Animations() {
-
+        landscape = Toolkit.getDefaultToolkit().getImage("countryside.png");
     }
 
     public void init(int w, int h) {
@@ -329,6 +333,12 @@ class Animations {
             raindrops[i][1] = r.nextInt(height); // y-offset
             raindrops[i][2] = r.nextInt(35) + (31 - raindrops[i][3]*2); // speed (lower = faster)
         }
+
+        for (int i=0; i<NSTARS; i++) {
+            stars[i][0] = r.nextInt(width);
+            stars[i][1] = r.nextInt(height/2);
+        }
+
         Arrays.sort(raindrops, new Comparator<int[]>() {
             @Override public int compare(final int[] one, final int[] two) {
                 if (one[3] > two[3]) {
@@ -344,13 +354,13 @@ class Animations {
     public void rain(Graphics2D pen) {
 
         // sky background
-        pen.setColor(new Color(188, 204, 232));
+        pen.setColor(new Color(184, 195, 196));
         pen.fillRect(0,0,width,height);
 
         // draw half the raindrops
-        int half = NDROPS/2;
+        int quarter = NDROPS/4;
         pen.setColor(new Color(55, 115, 193));
-        for (int i=0; i<half; i++) {
+        for (int i=0; i<quarter; i++) {
             pen.fillOval(raindrops[i][0], (int) (raindrops[i][1]+offset/raindrops[i][2])%height,
                     raindrops[i][3], raindrops[i][3]*2);
         }
@@ -361,11 +371,46 @@ class Animations {
             pen.fillOval(i, -10, 70, 30);
         }
 
+        pen.drawImage(landscape, 0, 0, null);
+
+
         // draw rest of raindrops
         pen.setColor(new Color(55, 115, 193));
-        for (int i=half; i<NDROPS; i++) {
+        for (int i=quarter; i<NDROPS; i++) {
             pen.fillOval(raindrops[i][0], (int) (raindrops[i][1]+offset/raindrops[i][2])%height,
-                    raindrops[i][3], raindrops[i][3]*2);
+                    raindrops[i][3], raindrops[i][3]);
+        }
+    }
+
+    public void sunny(Graphics2D pen) {
+
+        // sky background
+        pen.setColor(new Color(167, 225, 246));
+        pen.fillRect(0,0,width,height);
+
+        int period = (int) ((((offset+15000)/120) % 700));
+        int alpha = Math.abs(period-255);
+
+        // sun
+        if (200-period > -90 && 200-period < height) {
+            pen.setColor(new Color(244, 224, 83));
+            pen.fillOval(period / 3, 200 - period, 90, 90);
+        } else {
+        }
+
+        // the landscape
+        pen.drawImage(landscape, 0, 0, null);
+
+        if (alpha > 170) {
+            // darkness
+            pen.setColor(new Color(0, 0, 0, Math.min(255, alpha)));
+            pen.fillRect(0, 0, width, height);
+
+            // stars
+            pen.setColor(new Color(255, 255, 255, Math.min(255, alpha/2)));
+            for (int i=0; i<NSTARS; i++) {
+                pen.drawString("★", stars[i][0], stars[i][1]);
+            }
         }
     }
 
