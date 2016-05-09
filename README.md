@@ -2,15 +2,19 @@
 
 # Weather
 
-A project for HIT237, Assignment 1 by Samuel Walladge (student number: s265679).
+A project for HIT237 Assignment 2, by Samuel Walladge (student number: s265679).
 
 Copyright © 2016 Samuel Walladge
+
+Repository hosted at [https://bitbucket.org/swalladge/weather](https://bitbucket.org/swalladge/weather).
 
 
 ## Info
 
 - This is an IntelliJ IDE project, so the build system is whatever its default is (gradle I think).
 - Main class to run for the GUI app is `Weather`
+- Depends on [jsoup](https://jsoup.org/). (just download the jsoup jar and dump in the `lib` subdirectory of the project root directory)
+
 
 ## Features
 
