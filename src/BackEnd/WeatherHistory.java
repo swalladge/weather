@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// TODO: implement tree balancing
 class BST {
     private Node root;
 
@@ -60,9 +59,8 @@ class BST {
 
     @Override
     public String toString() {
-        // TODO: make pretty
         if (root == null) {
-            return "Empty BST!";
+            return "digraph BST {\n\n}\n"; // empty graph but still valid DOT
         } else {
             return root.toString();
         }
@@ -71,7 +69,6 @@ class BST {
     private class Node {
 
         private ArrayList<WeatherObservation> obs = new ArrayList<>();
-        private Node parent;
         private final Date date;
         private Node leftChild = null;
         private Node rightChild = null;
@@ -99,21 +96,42 @@ class BST {
             }
         }
 
+        // this tostring method will return a string containing the binary tree structure
+        //  in graphviz DOT language (http://graphviz.org/)
+        // - to visualize the tree, run the string through the 'dot' command.
         @Override
         public String toString() {
-            String s = "";
-            if (leftChild != null) {
-                s += leftChild.toString();
+            String s = "digraph BST {\n";
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
+            if (leftChild == null && rightChild == null) {
+                s += "  \"" + format.format(date) + "\";\n";
             }
-            for (WeatherObservation o: obs) {
-                s += o + "\n";
+            if (leftChild != null) {
+                s += "  \"" + format.format(date) + "\" -> \"" + format.format(leftChild.date) + "\";\n";
+                s += leftChild.toStringHelper();
             }
             if (rightChild != null) {
-                s += rightChild.toString();
+                s += "  \"" + format.format(date) + "\" -> \"" + format.format(rightChild.date) + "\";\n";
+                s += rightChild.toStringHelper();
             }
-
+            s += "}\n";
             return s;
 
+        }
+
+        // helper for the tostring method
+        private String toStringHelper() {
+            String s = "";
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
+            if (leftChild != null) {
+                s += "  \"" + format.format(date) + "\" -> \"" + format.format(leftChild.date) + "\";\n";
+                s += leftChild.toStringHelper();
+            }
+            if (rightChild != null) {
+                s += "  \"" + format.format(date) + "\" -> \"" + format.format(rightChild.date) + "\";\n";
+                s += rightChild.toStringHelper();
+            }
+            return s;
         }
 
         public Integer size() {
@@ -270,6 +288,7 @@ public class WeatherHistory implements Serializable, Database {
             logger.log(Level.SEVERE, "Parse Exception [{0}]", e.getMessage());
             return false;
         }
+        System.out.println(history);
         return true;
     }
 
