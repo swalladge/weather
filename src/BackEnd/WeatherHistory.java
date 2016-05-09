@@ -247,13 +247,6 @@ public class WeatherHistory implements Serializable, Database {
             return false;
         } finally {
             try {
-                if (isr != null) {
-                    isr.close();
-                }
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "IOException [{0}]", e.getMessage());
-            }
-            try {
                 if (r != null) {
                     r.close();
                 }
