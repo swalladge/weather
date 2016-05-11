@@ -12,9 +12,11 @@ public class Weather {
         // init the database
         Database db = new WeatherHistory();
 
+        // setup the gui and connect to the database
         GUI gui = new GUI();
         gui.setDB(db);
 
+        // show the gui!
         gui.showGUI();
     }
 }

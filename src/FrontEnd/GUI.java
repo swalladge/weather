@@ -2,7 +2,6 @@ package FrontEnd;
 
 import BackEnd.Database;
 import BackEnd.WeatherObservation;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * The user interface class - this sets up the gui, connects to the database, adds the listeners, etc.
  */
-public class GUI implements ActionListener, KeyListener, MouseListener {
+public class GUI implements ActionListener {
 
     private static Logger logger = Logger.getLogger(GUI.class.getName());
     JFrame frame = new JFrame();
@@ -78,7 +77,15 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
 
 
         //searchText.setColumns(30);
-        searchText.addKeyListener(this);
+        searchText.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+                int c = keyEvent.getKeyCode();
+                if (c == KeyEvent.VK_ENTER) {
+                    performSearch(searchText.getText());
+                }
+            }
+        });
 
         // setup the drawing panel
         drawPanel.setPreferredSize(new Dimension(1000, 200));
@@ -162,6 +169,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         redrawInfo();
 
         // loading is a once off thing in this app
+        // changing text to loaded once done effectively disables this block from firing again
         if (actionEvent.getActionCommand() == "Load") {
             if (!db.loadObservationsFromHTMLFile()) {
                 errorMessage = "<p style=\"color:red;\">Could not load from html file!</p>";
@@ -254,31 +262,19 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
                 return false;
             }
         };
-        dataTable.addMouseListener(this);
+        dataTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                printWeatherData();
+
+            }
+        });
         //dataTable.addKeyListener(this);
         dataTable.setBackground(new Color(0xD1EFD8));
         scrollPane.setViewportView(dataTable);
         dataTable.setFillsViewportHeight(true);
         printWeatherData();
 
-    }
-
-    @Override
-    public void keyTyped(KeyEvent keyEvent) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent keyEvent) {
-
-    }
-
-    @Override
-    public void keyReleased(KeyEvent keyEvent) {
-        int c = keyEvent.getKeyCode();
-        if (c == KeyEvent.VK_ENTER) {
-            performSearch(searchText.getText());
-        }
     }
 
     private void printWeatherData() {
@@ -302,7 +298,7 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         Double wind = (Double) dataTable.getModel().getValueAt(row, 5);
 
         // choose the animation
-        // TODO: better criteria
+        // only basic/naive criteria (if high humidity and not hot summer's day, probably raining).
         if (humid > 50 && temp < 35) {
             drawPanel.setAnimation("rain");
         } else {
@@ -317,30 +313,6 @@ public class GUI implements ActionListener, KeyListener, MouseListener {
         redrawInfo();
     }
 
-    // currently only the jtable listens for mouse clicks
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent) {
-        printWeatherData();
-    }
-
-    @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent) {
-
-    }
 
     private class animatedJPanel extends JPanel implements Runnable {
         long offset = 0;

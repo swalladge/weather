@@ -71,7 +71,7 @@ public class WeatherHistory implements Serializable, Database {
         InputStreamReader isr = null;
         BufferedReader r = null;
         try {
-            // TODO: [ENHANCEMENT] allow loading from other html files
+            // [ENHANCEMENT] allow loading from other html files (not in scope)
             String urlString = "http://rengland.spinetail.cdu.edu.au/observations/";
             URL url = new URL(urlString);
             URLConnection connect = url.openConnection();
