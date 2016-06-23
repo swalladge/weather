@@ -1,12 +1,18 @@
 
-
 # Weather
 
-A project for HIT237 Assignment 2, by Samuel Walladge (student number: s265679).
+A project for HIT237 Assignment 2.
 
 Copyright © 2016 Samuel Walladge
 
-Repository hosted at [https://bitbucket.org/swalladge/weather](https://bitbucket.org/swalladge/weather).
+Repository available at [https://github.com/swalladge/weather](https://github.com/swalladge/weather).
+
+![screenshot](screenshot.png)
+
+
+## Background
+
+This project was developed for a uni subject on interactive software (java programming).
 
 
 ## Info
